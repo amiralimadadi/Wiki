@@ -1,0 +1,959 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "BYekan";
+  src: url("../src/assets/fonts/Yekan.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: "BYekan";
+  src: url("../src/assets/fonts/Yekan.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+}
+
+body {
+  font-family: "BYekan", sans-serif;
+  background-color: #f5f5f7;
+}
+* {
+  font-family: "BYekan", sans-serif;
+}
+
+.ant-form-item-explain {
+  @apply opacity-0 max-h-0 overflow-hidden;
+  transition: opacity 0.3s ease, max-height 0.3s ease;
+}
+
+/* وقتی خطا ظاهر میشه */
+.ant-form-item-has-error .ant-form-item-explain {
+  @apply opacity-100 max-h-20;
+}
+
+/* در global.css یا فایل استایل سراسری */
+.custom-input {
+  @apply bg-white text-sm rounded-lg border border-gray-300 outline-none transition-all duration-200;
+}
+.custom-input:focus,
+.custom-input:hover {
+  @apply border-[#007141] bg-white shadow-none;
+}
+
+.custom-btn {
+  background-color: #007041 !important;
+  color: white !important;
+}
+
+.custom-placeholder::placeholder {
+  color: #9ca3af;
+  font-size: 13px;
+  font-weight: 400;
+}
+
+.custom-menu .ant-menu-item,
+.custom-menu .ant-menu-submenu-title {
+  text-align: right;
+  white-space: normal !important;
+  overflow: visible !important;
+  padding-right: 12px !important;
+  padding-top: 8px !important;
+  padding-bottom: 8px !important;
+  margin: 0 !important;
+  line-height: 1.4 !important;
+  min-height: 36px !important;
+  background-color: #ffffff;
+  min-width: 206px !important;
+  max-width: 320px !important;
+  color: #655e5e;
+  font-size: 12.25px;
+  display: flex;
+  gap: 14px !important;
+}
+
+.like-box {
+  background: #f0f0f0;
+  padding: 4px 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.like-box:hover,
+.like-box.liked {
+  background: #007041;
+}
+
+.like-box:hover svg,
+.like-box.liked svg,
+.like-box:hover span,
+.like-box.liked span {
+  color: white !important;
+  fill: white !important;
+}
+
+.custom-dropdown .ant-select-item-option-active {
+  background-color: transparent !important;
+}
+
+.custom-dropdown .ant-select-item-option:hover {
+  background-color: #f0f0f0 !important;
+  color: #007041 !important;
+  border: 1px solid gray;
+}
+
+.custom-select .ant-select-selector {
+  border: 1px solid #007041 !important;
+  border-radius: 8px;
+  padding: 4px 8px;
+  transition: 0.2s ease-in-out;
+}
+
+.custom-select .ant-select-selection-item {
+  background-color: #e6f4ea !important;
+  border-radius: 4px;
+  color: #007041;
+}
+
+.hidens {
+  visibility: hidden;
+}
+
+.blocks {
+  visibility: visible;
+}
+
+.description {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ant-pagination {
+  font-family: BYekan !important;
+}
+
+.custom-select .ant-select-selector {
+  background-color: #f0f0f0;
+  border: 1px solid #007041;
+  font-family: "BYekan";
+  padding: 6px 12px;
+  height: 42px;
+  display: flex;
+  align-items: center;
+  font-weight: bold;
+}
+
+.custom-input {
+  font-weight: bold;
+  border-radius: 8px;
+  border: 1px solid #007041;
+}
+.custom-input:hover {
+  border: 1px solid #068b53;
+}
+
+.custom-input::placeholder {
+  font-weight: bold;
+}
+
+.customtextarea {
+  border: 1px solid #9faba6;
+}
+
+.customtextarea:hover {
+  border: 1px solid #068b53;
+}
+
+.customtextarea:active {
+  border: 1px solid #068b53;
+}
+
+.customtextarea::before {
+  border: 1px solid #068b53;
+}
+
+.custom-select .ant-select-selection-placeholder {
+  color: #514848;
+  font-size: 13px;
+  font-weight: bold;
+  font-family: "iranyekan", sans-serif;
+}
+
+.custom-input::placeholder {
+  color: #514848;
+
+  font-size: 14px;
+  font-weight: bold;
+  font-family: "iranyekan", sans-serif;
+}
+
+.score-table-wrapper {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.05);
+  direction: rtl;
+}
+
+.score-table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.custom-score-table .ant-table-thead > tr > th {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  text-align: center;
+}
+
+.custom-score-table .ant-table-tbody > tr > td {
+  text-align: center;
+  font-size: 14px;
+}
+
+/* استایل برای صفحه امتیازها */
+.score-wrapper {
+  background-color: white;
+  padding: 24px;
+  border-radius: 12px;
+  direction: rtl;
+  font-family: Vazirmatn, IRANSans, sans-serif;
+}
+
+/* هدر */
+.score-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.left-buttons {
+  display: flex;
+  gap: 8px;
+}
+.right-button {
+  display: flex;
+}
+.score-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+/* جدول */
+.score-table .ant-table,
+.score-table .ant-table-container,
+.score-table .ant-table-cell,
+.score-table .ant-table-content table,
+.score-table table {
+  border: none !important;
+}
+
+.score-table .ant-table-thead > tr,
+.score-table .ant-table-tbody > tr:nth-child(even) {
+  background-color: #f7f7f8 !important;
+}
+.score-table .ant-table-tbody > tr:nth-child(odd) {
+  background-color: #ffffff !important;
+}
+
+.score-table .ant-table-tbody > tr:hover,
+.score-table .ant-table-tbody > tr:hover > td {
+  background-color: #e1e1e3 !important;
+  cursor: pointer;
+}
+
+.score-table .ant-table-thead > tr > th,
+.score-table .ant-table-tbody > tr > td {
+  text-align: center !important;
+  font-size: 14px;
+  font-family: inherit;
+  border: none !important;
+}
+
+.compact-column .ant-table-cell {
+  padding-left: 6px !important;
+  padding-right: 6px !important;
+}
+
+.score-table .ant-table-cell {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+.compact-column {
+  padding-left: 4px !important;
+  padding-right: 4px !important;
+}
+
+.ant-table-tbody > tr > td.compact-column {
+  padding: 8px 4px !important;
+}
+
+.score-table .ant-table-tbody > tr > td,
+.score-table .ant-table-thead > tr > th {
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  line-height: 2.2 !important;
+  height: 40px !important;
+  font-size: 12px;
+}
+
+.score-table .compact-column {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.score-table .ant-table-thead > tr > th,
+.score-table .ant-table-tbody > tr > td {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  font-size: 12px !important;
+}
+
+.transition-panel {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+  opacity: 0;
+  transform: translateY(-10px);
+  pointer-events: none;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.25rem;
+  width: 12rem; /* 48 */
+  background-color: white;
+  border: 1px solid #d1d5db; /* gray-300 */
+  border-radius: 0.375rem; /* rounded-md */
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  padding: 0.75rem;
+  z-index: 50;
+}
+
+.transition-panel.show {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.custom-row-style {
+  background-color: #f5f5f5 !important;
+}
+
+.checkbox-green .ant-checkbox-inner {
+  border-color: #28a745;
+}
+
+.checkbox-green .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #28a745;
+  border-color: #28a745;
+}
+
+/* پرینت فقط جدول */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  .ant-table,
+  .ant-table * {
+    visibility: visible;
+  }
+  .ant-table {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+  }
+}
+
+.owner-tag {
+  background-color: #f5f5f5;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 13px;
+  display: inline-flex;
+  align-items: center;
+  margin: 4px;
+}
+.owner-tag .anticon-delete {
+  margin-left: 5px;
+  color: red;
+  cursor: pointer;
+}
+
+.custom-table .ant-table-cell {
+  border-bottom: none !important;
+}
+.custom-table .ant-table-thead > tr > th {
+  border-bottom: none !important;
+}
+.even-row {
+  background-color: #f5f5f5;
+}
+.odd-row {
+  background-color: white;
+}
+
+.even-row {
+  background-color: #f9f9f9;
+}
+.odd-row {
+  background-color: #ffffff;
+}
+.custom-table .ant-table-cell {
+  border-bottom: none !important;
+}
+
+.green-checkbox .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #00c853 !important;
+  border-color: #00c853 !important;
+}
+
+.green-checkbox .ant-checkbox-inner {
+  border-radius: 4px;
+}
+
+.ant-dropdown {
+  z-index: 9999 !important;
+}
+.green-checkbox .ant-checkbox-checked .ant-checkbox-inner {
+  background-color: #00c853 !important;
+  border-color: #00c853 !important;
+}
+
+.green-checkbox .ant-checkbox-checked .ant-checkbox-inner::after {
+  border-color: white !important;
+}
+
+@media print {
+  body {
+    background: white !important;
+  }
+
+  .print-center {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+
+  .no-print {
+    display: none !important;
+  }
+
+  .ant-table {
+    margin: 0 auto !important;
+  }
+}
+
+.custom-datepicker-input {
+  width: 472px;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  height: 32px;
+  font-size: 14px;
+  direction: rtl;
+  text-align: center;
+  cursor: pointer;
+  background-color: #fff;
+  direction: rtl;
+  text-align: right;
+}
+.custom-datepicker-input::placeholder {
+  text-align: right;
+  padding: 15px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+/* اندازه تقویم و رنگ سبز برای روز انتخاب‌شده */
+.custom-calendar {
+  width: 255px !important;
+  height: 264px !important;
+}
+
+.custom-calendar .Calendar__day.-selected {
+  background-color: #007041 !important;
+  color: white !important;
+  border-radius: 50% !important;
+  width: 20%;
+}
+
+.ant-input:focus,
+.ant-select-focused .ant-select-selector {
+  border-color: #d1d5db !important;
+  box-shadow: none !important;
+}
+
+/* فرضا در فایل CSS */
+.ant-table-thead > tr > th {
+  font-weight: bold;
+  font-size: 12px;
+}
+
+/* در فایل CSS پروژه این استایل‌ها را اضافه کنید */
+.ant-pagination-rtl {
+  direction: rtl;
+}
+
+.ant-pagination-rtl .ant-pagination-item {
+  margin: 0 4px;
+}
+
+.ant-pagination-rtl .ant-pagination-item-active {
+  border-color: #147c50;
+}
+
+.ant-pagination-rtl .ant-pagination-item-active a {
+  color: #147c50;
+}
+
+.modal-centered {
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+}
+
+.ant-form-item-has-error .ant-input,
+.ant-form-item-has-error .ant-select-selector,
+.ant-form-item-has-error .ant-select,
+.ant-form-item-has-error .ant-input-affix-wrapper,
+.ant-form-item-has-error .ant-upload,
+.ant-form-item-has-error .ant-picker {
+  border-color: #d9d9d9 !important;
+  box-shadow: none !important;
+}
+
+.no-hover-effect:hover,
+.no-hover-effect:focus,
+.no-hover-effect:active {
+  background-color: #007041 !important;
+  border-color: #007041 !important;
+  color: #fff !important;
+  box-shadow: none !important;
+  filter: none !important;
+  opacity: 1 !important;
+  cursor: pointer;
+}
+
+.no-hover-bg:hover,
+.no-hover-bg:focus,
+.no-hover-bg:active {
+  background-color: transparent !important;
+  color: inherit !important;
+  box-shadow: none !important;
+}
+
+.ant-input,
+.ant-input-affix-wrapper {
+  background-color: white !important;
+}
+
+.ant-input:focus,
+.ant-input-focused,
+.ant-input-affix-wrapper-focused {
+  background-color: white !important;
+  box-shadow: none !important;
+}
+
+.ant-input:hover,
+.ant-input-affix-wrapper:hover {
+  background-color: white !important;
+}
+
+.ant-input:not(:placeholder-shown),
+.ant-input-affix-wrapper:not(:placeholder-shown) {
+  background-color: white !important;
+}
+
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px white inset !important;
+  box-shadow: 0 0 0 1000px white inset !important;
+  -webkit-text-fill-color: #000 !important;
+}
+
+.ant-input,
+.ant-select-selector,
+.ant-input:hover,
+.ant-select-selector:hover,
+.ant-input:focus,
+.ant-select-focused .ant-select-selector {
+  border-color: transparent !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  transition: border-color 0.3s ease;
+}
+
+.ant-input:hover,
+.ant-select-selector:hover {
+  border-color: #007041 !important;
+}
+
+.ant-input:focus,
+.ant-select-focused .ant-select-selector {
+  border-color: #007041 !important;
+  box-shadow: 0 0 0 2px rgba(0, 112, 65, 0.2) !important;
+}
+
+.ant-btn.bg-green-custom {
+  background-color: #007041 !important;
+  border-color: #007041 !important;
+  color: white !important;
+}
+
+.ant-btn.bg-green-custom:hover,
+.ant-btn.bg-green-custom:focus,
+.ant-btn.bg-green-custom:active {
+  background-color: #007041 !important;
+  border-color: #007041 !important;
+  color: white !important;
+}
+
+.ant-btn.no-blue-border {
+  border-color: #d1d5db !important; /* خاکستری روشن */
+  color: #000 !important;
+}
+
+.ant-btn.no-blue-border:hover,
+.ant-btn.no-blue-border:focus,
+.ant-btn.no-blue-border:active {
+  border-color: #d1d5db !important;
+}
+
+.structured-form-wrapper .ant-input,
+.structured-form-wrapper .ant-input-affix-wrapper,
+.structured-form-wrapper .ant-select-selector,
+.structured-form-wrapper .ant-input-textarea {
+  border: 0.1px solid #d1d5db !important;
+  border-radius: 6px !important;
+  transition: border-color 0.3s ease;
+  background-color: #fff !important;
+}
+
+.ant-input::placeholder {
+  color: #9ca3af;
+  font-weight: 700;
+  opacity: 1;
+  font-size: 13px;
+}
+
+.custom-btn.ant-btn:hover,
+.custom-btn.ant-btn:focus,
+.custom-btn.ant-btn:active,
+.custom-btn.ant-btn:hover:active {
+  background-color: #007041 !important;
+  color: white !important;
+  /* border-color: #007041 !important; */
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+.custom-input {
+  border: 1px solid #bbb6b6 !important;
+  border-radius: 8px;
+  box-shadow: none !important;
+}
+
+.custom-input:focus {
+  border-color: #d9d9d9 !important;
+  box-shadow: none !important;
+}
+
+.ant-menu-inline > .ant-menu-submenu > .ant-menu-submenu-title {
+  padding-top: 1px !important;
+  padding-bottom: 1px !important;
+  margin-bottom: 0 !important;
+  line-height: 1.2 !important;
+}
+.custom-menu > .ant-menu-submenu > .ant-menu-submenu-title {
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+}
+
+.custom-menu .ant-menu-item,
+.custom-menu .ant-menu-submenu-title {
+  padding-top: 4px !important;
+  padding-bottom: 4px !important;
+  padding-right: 8px !important;
+  padding-left: 8px !important;
+  line-height: 1.2 !important;
+  margin: 0 !important;
+  min-height: 28px !important;
+  font-size: 12px !important;
+  gap: 4px !important;
+}
+
+.custom-input,
+.custom-input .ant-input,
+.custom-input .ant-input:hover,
+.custom-input .ant-input:focus {
+  border-color: #d1d5db;
+  box-shadow: none !important;
+}
+
+.custom-input textarea.ant-input {
+  border-color: #d1d5db;
+  box-shadow: none !important;
+}
+
+/* جلوگیری از رنگ سبز داخل Select پس از انتخاب */
+.custom-select .ant-select-selector {
+  background-color: #fff !important; /* پس‌زمینه سفید معمولی */
+}
+
+/* آیتم انتخاب‌شده داخل سلکت */
+.custom-select .ant-select-selection-item {
+  background-color: transparent !important;
+  color: #000 !important; /* رنگ متن معمولی */
+}
+
+/* وقتی سلکت فوکوس دارد (باز است) */
+.custom-select.ant-select-focused .ant-select-selector {
+  background-color: #fff !important;
+}
+
+
+/* برای همه‌ی inputها */
+.custom-input.ant-input:focus,
+.custom-input.ant-input-focused {
+  border-color: #007041 !important;
+  box-shadow: 0 0 0 2px rgba(0, 112, 65, 0.15) !important;
+}
+
+/* برای TextArea هم همین‌طور */
+.customtextarea.ant-input:focus,
+.customtextarea.ant-input-focused {
+  border-color: #007041 !important;
+  box-shadow: 0 0 0 2px rgba(0, 112, 65, 0.15) !important;
+}
+
+/* برای Select (دسته‌بندی و غیره) */
+.custom-select.ant-select-focused .ant-select-selector {
+  border-color: #007041 !important;
+  box-shadow: 0 0 0 2px rgba(0, 112, 65, 0.15) !important;
+}
+
+/* برای AutoComplete هم که از Input استفاده می‌کنه */
+.ant-select-auto-complete.ant-select-focused .ant-select-selector {
+  border-color: #007041 !important;
+  box-shadow: 0 0 0 2px rgba(0, 112, 65, 0.15) !important;
+}
+
+/* پس‌زمینه‌ی همیشه سفید برای جلوگیری از سبز شدن */
+.custom-input,
+.custom-select .ant-select-selector {
+  background-color: #fff !important;
+}
+
+/* حالت پیش‌فرض (قبل از فوکوس): پس‌زمینه طوسی و بوردر خاکستری */
+.custom-input,
+.customtextarea,
+.custom-select .ant-select-selector,
+.ant-select-auto-complete .ant-select-selector,
+.ant-upload-select {
+  background-color: #f5f5f5 !important; /* پس‌زمینه طوسی روشن */
+  border: 1px solid #d9d9d9 !important; /* خاکستری ملایم */
+  border-radius: 6px;
+  transition: all 0.2s ease-in-out;
+}
+
+/* رنگ placeholder */
+.custom-input::placeholder,
+.ant-select-selection-placeholder {
+  color: #999 !important;
+}
+
+/* حالت فوکوس یا فعال: سبز */
+.custom-input.ant-input:focus,
+.custom-input.ant-input-focused,
+.customtextarea.ant-input:focus,
+.customtextarea.ant-input-focused,
+.custom-select.ant-select-focused .ant-select-selector,
+.ant-select-auto-complete.ant-select-focused .ant-select-selector {
+  border-color: #007041 !important;
+  box-shadow: 0 0 0 2px rgba(0, 112, 65, 0.15) !important;
+  background-color: #fff !important; /* در حالت فوکوس سفید می‌شود */
+}
+
+/* برای Select همیشه رنگ پس‌زمینه سفید نشود هنگام انتخاب */
+.custom-select .ant-select-selector {
+  background-color: #f5f5f5 !important;
+}
+
+/* وقتی منوی Select باز می‌شود */
+.custom-select.ant-select-open .ant-select-selector {
+  background-color: #fff !important;
+  border-color: #007041 !important;
+}
+
+/* آپلود */
+.ant-upload-select:hover {
+  border-color: #007041 !important;
+}
+/* اضافه کردن خط زیر عنوان مودال */
+.ant-modal-header {
+  border-bottom: 1px solid #e5e7eb !important; /* رنگ طوسی */
+  padding-bottom: 8px !important;
+}
+
+/* کاهش فاصله عمودی بین فیلدهای فرم */
+.csstom-form .ant-form-item {
+  margin-bottom: 7px !important; /* پیش‌فرض 24px است */
+}
+
+/* در صورتی که بخوای فاصله بین ردیف‌های Row کمتر بشه */
+.csstom-form .ant-row {
+  margin-bottom: 7px;
+}
+
+
+
+/* ظرف اصلی */
+.upload-box {
+  /* display: flex; */
+  align-items: center;
+  justify-content: space-between;
+  flex-direction: row-reverse;   /* جهت را برعکس می‌کنیم تا فایل‌ها از راست اضافه بشن */
+  width: 100%;
+  background: #f5f5f5;
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+  padding: 9px 12px !important;
+  gap: 10px;
+  margin-top: 5px !important;
+}
+
+/* برچسب راست */
+.upload-label {
+  white-space: nowrap;
+}
+
+/* لیست فایل‌ها بین برچسب و دکمه */
+.upload-box .ant-upload-list {
+  flex: 1;
+  display: flex;
+  justify-content: flex-start;   /* چینش فایل‌ها از راست به چپ */
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+}
+
+/* هر فایل مثل چیپ */
+.upload-box .ant-upload-list-item {
+  margin-top: 28px !important;
+  padding: 2px 8px;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  height: 31px !important;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 9px !important;
+}
+
+/* متن فایل یک‌خطی */
+.upload-box .ant-upload-list-item-name {
+  max-width: 180px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+/* دکمه انتخاب فایل */
+.upload-btn {
+  background: #fff !important;
+  border: 1px solid #d9d9d9 !important;
+  border-radius: 6px !important;
+  color: #333 !important;
+  white-space: nowrap;
+  position: absolute !important;
+  top: 8px !important;
+  left: 16px !important;
+}
+.upload-btn:hover {
+  border-color: #007041 !important;
+  color: #007041 !important;
+}
+
+/* اکشن‌ها همیشه دیده بشن، نه فقط روی hover */
+.upload-box .ant-upload-list-item .ant-upload-list-item-actions {
+  display: inline-flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* اکشن‌ها همیشه دیده شوند، نه فقط روی hover */
+.upload-box .ant-upload-list-item .ant-upload-list-item-actions {
+  display: inline-flex !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* اگر هنوز قانون hover آنت‌دی غالب بود، این هم اضافه شود */
+.upload-box .ant-upload-list-item:hover .ant-upload-list-item-actions {
+  opacity: 1 !important;
+}
+
+/* قرمز ماندن آیکن (در همه حالت‌ها) */
+.upload-box .ant-upload-list-item .ant-upload-list-item-actions .anticon,
+.upload-box .ant-upload-list-item .anticon-delete,
+.upload-box .ant-upload-list-item .anticon-delete svg {
+  color: #ff4d4f !important;
+  opacity: 1 !important;
+}
+
+
+.custom-input .ant-select-arrow { color: #000 !important; }
+/* متن انتخاب‌شده داخل فیلد و آیتم‌های لیست را یک‌خطی و با … کن */
+.mention-select .ant-select-selection-item,
+.mention-select .ant-select-item-option-content {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.visible-border .ant-select-selector {
+  border: 1px solid #d9d9d9 !important;
+  border-radius: 6px !important;
+  min-height: 38px !important;
+  padding: 4px 8px !important;
+  display: flex !important;
+  align-items: center !important;
+  background-color: #fff !important;
+}
+
+
+.bg-custom{
+  background-color: #f5f5f5 !important;
+}
+
+.ant-card:hover {
+  cursor: pointer !important;
+}
+
