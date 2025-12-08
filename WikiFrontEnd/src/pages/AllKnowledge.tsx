@@ -40,9 +40,15 @@ import StructuredForm from "../forms/StructuredForm";
 import type { Articles } from "../types/Interfaces";
 import type { RootState } from "../redux/store";
 
+interface AllKnowledgeProps {
+  articles?: Articles[]; // اختیاری، که هم از بالا بشود داد، هم خودش fetch کند
+}
+
+
 const { Paragraph, Text, Title } = Typography;
 
-const AllKnowledge: React.FC = () => {
+const AllKnowledge: React.FC<AllKnowledgeProps> = ({ articles }) => {
+
   const [open, setOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<Articles | null>(null);
 

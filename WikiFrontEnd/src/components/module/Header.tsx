@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Row, Col } from "antd";
 import logo2 from "/images/logo2.png";
 import icon from "/images/icon.png";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Popover } from "antd";
 import { toPersianDigits } from "../../../src/utils/persianNu";
 import NavTabs from "../common/NavTabs";
@@ -18,11 +18,36 @@ function Header() {
   type TabKey = ReturnType<typeof getTabs>[number]["key"];
   const navigate = useNavigate();
   const [activeKey, setActiveKey] = useState<TabKey>("knowledgeContent");
+
+    const location = useLocation();
+
+  // تابعی برای تبدیل آدرس به کلید تب
+  const mapPathToTabKey = (path: string): TabKey => {
+    if (path.startsWith("knowledgeContent")) return "knowledgeContent";
+    if (path.startsWith("questions")) return "questions";
+    if (path.startsWith("proposal")) return "proposal";
+    if (path.startsWith("project")) return "project";
+    if (path.startsWith("documentation")) return "documentation";
+    if (path.startsWith("admin")) return "admin";
+    return "knowledgeContent"; // دیفالت
+  };
+
+  useEffect(() => {
+    const firstSegment = location.pathname.split("/")[1] || "";
+    // مثال: "/questions" → "questions"
+    // مثال: "/knowledgeContentPrint/12" → "knowledgeContent"
+    const key = mapPathToTabKey(firstSegment);
+    setActiveKey(key);
+  }, [location.pathname]);
+
+
   const [unreadCount, setUnreadCount] = useState<number>(0);
   const [accessList, setAccessList] = useState<string[]>([]);
 
   const tabs = getTabs(activeKey, accessList);
 
+
+  
 
   let userDetailse = null;
   try {

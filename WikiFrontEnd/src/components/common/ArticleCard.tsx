@@ -370,7 +370,7 @@ const handleCommentTagsChange = (value: string[]) => {
     }
 
     try {
-      const response = await fetch(`https://testwikiapi.ir${atta.address}`, {
+      const response = await fetch(`https://wikiapi.tipax.ir/${atta.address}`, {
         headers: {
           Authorization: cleanToken,
         },
@@ -487,7 +487,7 @@ const handleCommentTagsChange = (value: string[]) => {
         <p className="text-[13.25px] text-[#333333]"> {localItem.abstract}</p>
       </div>
       <div className="text-[14px] text-[#333333] font-yekan leading-8 font-semibold mt-[2rem]">
-        <p className="w-[79%]">{item.text}</p>
+        <p className="w-[86%] text-justify">{item.text}</p>
       </div>
 
        {item.attachments.map((atta) =>

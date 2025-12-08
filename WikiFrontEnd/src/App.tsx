@@ -15,6 +15,7 @@ import ContentArea from "./components/module/ContentArea";
 import Header from "./components/module/Header";
 import Header2 from "./components/module/Header2";
 import Login from "./pages/Login";
+import HomeLanding from "./pages/HomeLanding";
 import PrintPageWrapper from "./components/common/PrintPageWrapper";
 import ProtectedRoute from "./components/module/ProtectedRoute";
 import { useChangeTitle } from "./hooks/useTitle";
@@ -69,6 +70,11 @@ export default function App() {
 
   const location = useLocation();
   const navigate = useNavigate();
+  const isLandingPage = location.pathname === "/home";
+
+
+  const hideSidebarPaths = ["/home"];
+const hideSidebar = hideSidebarPaths.includes(location.pathname);
 
   useChangeTitle("سامانه تیپاکس یکپارچه");
 
@@ -179,8 +185,9 @@ export default function App() {
       </div>
     );
   }
-  return (
-    <div className="max-w-[1300px] mx-auto">
+return (
+  <div className="max-w-[1300px] mx-auto">
+    {!isLandingPage && (
       <div
         className={`flex justify-center mb-[15px] mt-[11px] ${
           location.pathname === "/admin" ? "mr-[10rem]" : ""
@@ -190,62 +197,70 @@ export default function App() {
         {isGoalPath ? (
           <GoalSidebar
             collapsed={sidebarCollapsed}
-            // @ts-expect-error لازم به دلیل ناسازگاری تایپ‌ها
+            // @ts-expect-error
             selectedKey={location.pathname}
             onSelect={(key) => navigate(key)}
             onToggleCollapse={() => setSidebarCollapsed((prev) => !prev)}
           />
         ) : null}
       </div>
+    )}
 
-      <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100">
+      {/* ⬅ اینجا سایدبار رو شرطی کردیم */}
+      {!hideSidebar && (
         <section>
           <Sidebar />
         </section>
+      )}
 
-        <div className="flex-1 flex flex-col mr-[1.5rem]">
-          <Header2 />
-          <div className="flex-1">
-            <Routes>
-              <Route
-                path="/"
-                element={<Navigate to="/knowledgeContent" replace />}
-              />
-              <Route path="/login" element={<Login />} />
-              <Route
-                path="/:id"
-                element={
-                  <ProtectedRoute>
-                    <ContentArea />
-                  </ProtectedRoute>
-                }
-              />
+      <div className={`flex-1 flex flex-col ${!hideSidebar ? "mr-[1.5rem]" : ""}`}>
+    {!isLandingPage && <Header2 />}
+        <div className="flex-1">
+          <Routes>
+            <Route
+              path="/"
+              element={<Navigate to="/knowledgeContent" replace />}
+            />
+            <Route path="/login" element={<Login />} />
 
-              <Route path="/profile" element={<div>محتوای پروفایل</div>} />
-              <Route
-                path="/knowledgeContentPrint/:id"
-                // @ts-expect-error لازم به دلیل ناسازگاری تایپ‌ها
-                element={<PrintPageWrapper articles={data} />}
-              />
-            </Routes>
-          </div>
+            {/* صفحه لندینگ بعد از لاگین - بدون سایدبار */}
+            <Route path="/home" element={<HomeLanding />} />
 
-          <footer
-            className={`text-[10.5px] rounded-xl ${
-              location.pathname === "/admin" ? "mr-[10rem]" : ""
-            } text-[#333333] flex justify-between bg-white p-3 mt-[35px]`}
-          >
-            <div className="flex flex-col">
-              <p>سامانه تیپاکس یکپارچه</p>
-              <p>{toPersianDigits("دپارتمان IT تیپاکس - 2025")}</p>
-            </div>
-            <div className="flex flex-col items-center">
-              <p>{toPersianDigits("نسخه پنل :2.3.12")}</p>
-              <p>{toPersianDigits("نسخه API :1.4.1")}</p>
-            </div>
-          </footer>
+            <Route
+              path="/:id"
+              element={
+                <ProtectedRoute>
+                  <ContentArea />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route path="/profile" element={<div>محتوای پروفایل</div>} />
+            <Route
+              path="/knowledgeContentPrint/:id"
+              // @ts-expect-error لازم به دلیل ناسازگاری تایپ‌ها
+              element={<PrintPageWrapper articles={data} />}
+            />
+          </Routes>
         </div>
+
+        <footer
+          className={`text-[10.5px] rounded-xl ${
+            location.pathname === "/admin" ? "mr-[10rem]" : ""
+          } text-[#333333] flex justify-between bg-white p-3 mt-[35px]`}
+        >
+          <div className="flex flex-col">
+            <p>سامانه تیپاکس یکپارچه</p>
+            <p>{toPersianDigits("دپارتمان IT تیپاکس - 2025")}</p>
+          </div>
+          <div className="flex flex-col items-center">
+            <p>{toPersianDigits("نسخه پنل :2.3.12")}</p>
+            <p>{toPersianDigits("نسخه API :1.4.1")}</p>
+          </div>
+        </footer>
       </div>
     </div>
-  );
+  </div>
+);
 }

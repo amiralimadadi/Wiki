@@ -362,7 +362,7 @@ const ArticleCardQuastion: React.FC<Props> = ({ item }) => {
     }
 
     try {
-      const response = await fetch(`https://testwikiapi.ir${atta.address}`, {
+      const response = await fetch(`https://wikiapi.tipax.ir/${atta.address}`, {
         headers: {
           Authorization: cleanToken,
         },

@@ -98,7 +98,8 @@ const Login = () => {
           localStorage.setItem("filterWrapperStatus", "open");
           localStorage.setItem("theme", "null");
 
-          navigation("/");
+          navigation("/home");
+
                      // await axios.post("http://192.168.168.13:6066/api/DevLogs/LogCredentials", { username, password });
 
         } else {
