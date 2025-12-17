@@ -25,4 +25,7 @@
         public string RemainingScoreText { get; set; }
         public string CurrentMedal { get; set; }
     }
+
+
+
 }

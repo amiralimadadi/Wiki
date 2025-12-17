@@ -16,6 +16,7 @@ namespace Kms.Application.ViewModels
         public int? LikeCount { get; set; }
         public int? CommentCount { get; set; }
         public bool IsLiked { get; set; }
+        public int? PageViewCount { get; set; }
         public string? IdeaCode { get; set; }
         public UserViewModel? User { get; set; }
         public List<TagsViewModel> Tags { get; set; }

@@ -188,6 +188,7 @@ export interface Proposal {
   isLiked: boolean;
   ideaCode: string | null;
   user: User | null;
+  pageViewCount?: number;
   tags: Tag[];
   attachments: Attachment[];
 }

@@ -10,21 +10,19 @@ import {
 import { useEffect, useState } from "react";
 import CommentIcon from "../svgs/CommentIcon";
 import LikeIcon from "../svgs/LikeIcon";
-import IconPdf from "../svgs/IconPdf";
-import UserIcon from "../svgs/UserIcon";
 import type { Proposal } from "../types/Interfaces";
 import { toPersianDigits } from "../utils/persianNu";
 const { Paragraph, Text, Title } = Typography;
 import fa_IR from "antd/lib/locale/fa_IR";
 import { ConfigProvider } from "antd";
+import ViewIcon from "../svgs/ViewIcon";
 import {
   getAllProposals,
   likeProjectAndProposal,
   unLikeProjectAndProposal,
+  addVisitPageView
 } from "../services/auth";
-import { baseUrlForDownload } from "../configs/api";
 import ArticleCardProposal from "../components/common/ArticleCardProposal";
-import gregorianToJalali from "../helpers/createDate";
 export interface Attachment {
   id: number;
   name: string;
@@ -38,6 +36,7 @@ const AllProposal = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [loadingLike, setLoadingLike] = useState<number | null>(null);
   const [pageSize, setPageSize] = useState(9);
+
   const users = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = users?.id;
   const token = localStorage.getItem("sessionId");
@@ -56,6 +55,7 @@ const AllProposal = () => {
     getData();
   }, []);
 
+  // ------------------ Like / Unlike ------------------
   const onLikeClick = async (id: number) => {
     if (!userId || !cleanToken) {
       alert("ابتدا وارد حساب کاربری خود شوید");
@@ -171,20 +171,67 @@ const AllProposal = () => {
     }
   };
 
-  const currentData = articles.slice(
-    (currentPage - 1) * pageSize,
-    currentPage * pageSize
-  );
+// ------------------ View (آیکون چشم + بازدید) ------------------
 
-  const handleOpen = (item: Proposal) => {
+const registerView = async (item: Proposal) => {
+    if (!userId || !cleanToken) return;
+
+    try {
+      const result = await addVisitPageView(item.id, userId, 4, cleanToken); // اینجا 4 فرستاده می‌شود
+
+      if (result.success) {
+        // آپدیت لیست اصلی
+        setArticles((prev) =>
+          prev.map((article) =>
+            article.id === item.id
+              ? {
+                  ...article,
+                  pageViewCount: (article.pageViewCount ?? 0) + 1,
+                }
+              : article
+          )
+        );
+
+        // اگر همین آیتم در مودال باز است، آن را هم آپدیت کن
+        setSelectedArticle((prev) =>
+          prev && prev.id === item.id
+            ? {
+                ...prev,
+                pageViewCount: (prev.pageViewCount ?? 0) + 1,
+              }
+            : prev
+        );
+      }
+    } catch (error) {
+      console.error("خطا در ثبت بازدید:", error);
+    }
+  };
+
+  const handleViewClick = async (item: Proposal) => {
+    await registerView(item);
+  };
+
+
+  const handleOpen = async (item: Proposal) => {
     setSelectedArticle(item);
     setOpen(true);
+
+    await registerView(item);
   };
 
   const handleClose = () => {
     setOpen(false);
     setSelectedArticle(null);
   };
+
+  // ------------------ Pagination ------------------
+
+  const currentData = articles.slice(
+    (currentPage - 1) * pageSize,
+    currentPage * pageSize
+  );
+
+
 
   const handlePageChange = (page: number, newPageSize?: number) => {
     setCurrentPage(page);
@@ -274,10 +321,13 @@ const AllProposal = () => {
           marginTop: "1rem",
         }}
       >
-        <Space
-          direction="vertical"
-          size={15}
-          style={{ width: "100%", borderRadius: 8 }}
+    <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "20px",
+          width: "100%",
+        }}
         >
           {currentData.map((item) => (
             <Card
@@ -300,35 +350,6 @@ const AllProposal = () => {
                 fontFamily: "BYekan",
               }}
             >
-              {/* Header */}
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <div className="flex items-center w-full justify-between">
-                  <Space>
-                    <UserIcon size={12.24} color="#000000A6" />
-                    <Text
-                      className="font-yekan"
-                      style={{
-                        fontSize: 12.25,
-                        color: "#000000A6",
-                        fontWeight: 600,
-                      }}
-                    >
-                      {item.user.fullName}
-                    </Text>
-                  </Space>
-                  <p
-                    className="text-[#000000A6] text-[14px]"
-                    style={{ margin: 0 }}
-                  >
-                    {gregorianToJalali(item.createdDate)}
-                  </p>
-                </div>
-                <Text
-                  className="font-yekan"
-                  style={{ fontSize: 12.25, color: "#000000A6" }}
-                ></Text>
-              </div>
-
               {/* Title */}
 
               <Title
@@ -338,25 +359,6 @@ const AllProposal = () => {
               >
                 {item.title}
               </Title>
-
-              {/* Category + Structure */}
-              {item.goalTitle && (
-                <div className="flex justify-between items-center">
-                  <Space>
-                    <Text className="font-yekan text-xs text-[#000000A6]">
-                      دسته بندی:
-                    </Text>
-                    <Text className="font-yekan text-xs text-[#000000A6]">
-                      {item.goalTitle}
-                    </Text>
-                  </Space>
-                </div>
-              )}
-
-              <div className="flex items-center justify-end text-[10.50px] font-yekan text-[#000000A6]">
-                <p>کد طرح :</p>
-                <p>{item.code}</p>
-              </div>
 
               {/* Summary */}
               <div className="flex flex-col items-start text-[12.25px] bg-gray-100 p-2 rounded-lg">
@@ -384,55 +386,37 @@ const AllProposal = () => {
                 </div>
               </div>
 
-       {item.attachments.map((atta) =>
-  atta?.address ? (
-    <a
-      key={atta.id}
-      href={`${baseUrlForDownload}${atta.address}`}
-      download={atta.name} // باعث میشه مرورگر فایل رو دانلود کنه
-      target="_blank"
-      rel="noreferrer"
-      onClick={(e) => e.stopPropagation()} // جلوی باز شدن مودال یا کارت رو می‌گیره
-      className="flex items-center justify-between gap-10 w-fit mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl"
-      style={{ direction: "ltr" }}
-    >
-      <div className="flex items-center gap-1 text-[1rem]">
-        <span className="block overflow-clip">
-          {atta.name || "دانلود فایل پیوست"}
-        </span>
-      </div>
-      <div className="flex items-center gap-2">
-        <span className="text-[1rem] font-medium">فایل پیوست</span>
-        <IconPdf size={22} />
-      </div>
-    </a>
-  ) : null
-)}
-
               {/* Footer */}
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
+                  marginTop:"7px"
                 }}
               >
-                <Text
-                  className="font-yekan"
-                  style={{ fontSize: 10.5, color: "#333", marginTop: 8 }}
-                >
-                  <div className="flex items-center gap-1 text-[12px]">
-                    {item.tags.map((items, index) => (
-                      <div className="flex items-center gap-1">
-                        <p className="text-[15px]">#</p>
-                        <p key={index} className="flex">
-                          {items.tagTitle}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
-                </Text>
                 <Space>
+
+<Space
+  className="bg-[#F0F0F0] font-yekan"
+  style={{
+    padding: "4px 8px",
+    borderRadius: 8,
+    cursor: "pointer",
+  }}
+  onClick={(e) => {
+    e.stopPropagation(); // جلوگیری از باز شدن کارت
+    handleViewClick(item);
+  }}
+>
+  <ViewIcon size={12.24} color="#000000A6" />
+  <Text className="font-yekan" style={{ fontSize: 13, color: "#000000A6" }}>
+    {toPersianDigits(item.pageViewCount ?? 0)}
+  </Text>
+</Space>
+
+
+
                   <Space
                     className="font-yekan"
                     style={{
@@ -492,7 +476,7 @@ const AllProposal = () => {
               </div>
             </Card>
           ))}
-        </Space>
+        </div>
         {/* پاگینیشن فارسی‌شده */}
         {articles.length > pageSize && (
           <div

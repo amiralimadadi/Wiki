@@ -661,6 +661,12 @@ const getAllProposals = async (proposalFilter = "AllProposal", pageNo = 1) => {
 
 export { getAllProposals };
 
+
+
+
+
+
+
 const getMyProposals = async (proposalFilter = "MyProposal", pageNo = 1) => {
   try {
     const response = await api.get("ProjectAndProposal/GetAllProposal", {
@@ -3014,3 +3020,22 @@ const CreateUnitDocumentation = async (formData: FormData, token: string) => {
 };
 
 export { CreateUnitDocumentation };
+
+
+const getTop50Content = async () => {
+  try {
+    const response = await api.get("General/GetTop50Contents");
+
+    if (response.data) {
+      return { success: true, data: response.data };
+    } else {
+      return { success: false, message: "No data received" };
+    }
+  } catch (error) {
+    console.error("خطا در دریافت 50 محتوای برتر:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+export { getTop50Content };
+

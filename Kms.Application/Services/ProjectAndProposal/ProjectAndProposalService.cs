@@ -30,6 +30,7 @@ namespace Kms.Application.Services.ProjectAndProposal
         private readonly IGoalRepository _goalRepository;
         private readonly ILikeRepository _likeRepository;
         private readonly IUnitRepository _unitRepository;
+        private readonly IPageViewRepository _pageViewRepository;
         private readonly IUnitService _unitService;
         private readonly ITagRepository _tagRepository;
         private readonly IProjectAndProposalAttachmentRepository _projectAndProposalAttachmentRepository;
@@ -54,6 +55,7 @@ namespace Kms.Application.Services.ProjectAndProposal
             IAccountService accountService,
             IProjectRepository projectRepository,
             ILikeRepository likeRepository,
+            IPageViewRepository pageViewRepository,
             IUnitService unitService,
             IUnitRepository unitRepository,
             ITagRepository tagRepository,
@@ -75,6 +77,7 @@ namespace Kms.Application.Services.ProjectAndProposal
             _projectCommentRepository = projectCommentRepository;
             _unitService = unitService;
             _likeRepository = likeRepository;
+            _pageViewRepository = pageViewRepository;
             _projectRepository = projectRepository;
             _unitRepository = unitRepository;
             _tagRepository = tagRepository;
@@ -801,6 +804,9 @@ namespace Kms.Application.Services.ProjectAndProposal
             var tempLikeRepo = _likeRepository.GetAllAsNoTrackAsync()
                 .Where(s => s.EntityType == "Proposal" && result.Select(t => t.Id).Contains(s.EntityId)).ToList();
 
+            var tempPageViewRepo = _pageViewRepository.GetAllAsNoTrackAsync()
+                .Where(s => s.EntityType == "Proposal" && result.Select(t => t.Id).Contains(s.EntityId)).ToList();
+
 
             var tempAnsRepo = _proposalCommentRepository.GetAllAsNoTrackAsync()
                 .Where(s => result.Select(t => t.Id).Contains(s.ProposalId)).ToList();
@@ -827,6 +833,7 @@ namespace Kms.Application.Services.ProjectAndProposal
                 res.GoalTitle = tempGoalRepo.FirstOrDefault(s => s.Id == res.GoalId)?.GoalTitle;
 
                 res.LikeCount = tempLikeRepo.Count(s => s.EntityId == res.Id);
+                res.PageViewCount = tempPageViewRepo.Count(s => s.EntityId == res.Id);
                 res.CommentCount = tempAnsRepo.Count(s => s.ProposalId == res.Id);
                 res.IsLiked = tempLikeRepo.Any(s => s.EntityId == res.Id && s.UserId == userId);
                 res.Attachments = tempAttachmentRepo

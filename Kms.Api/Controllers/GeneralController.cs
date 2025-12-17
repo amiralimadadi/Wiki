@@ -224,6 +224,18 @@ namespace Kms.Api.Controllers
 
 
 
+        [HttpGet]
+        public async Task<ActionResult> GetTop50Contents()
+        {
+            var result = await _generalService.GetTop50Contents();
+            if (!result.IsSuccess)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+            return StatusCode(StatusCodes.Status200OK, result);
+        }
+
+
         #region Admin
 
         /// <summary>

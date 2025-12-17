@@ -1,4 +1,5 @@
-﻿using Kms.Domain.Entities;
+﻿using Common.SqlDto;
+using Kms.Domain.Entities;
 using Kms.Domain.Entities.Account;
 using Kms.Domain.Entities.General;
 using Kms.Domain.Entities.KnowledgeContentGroup;
@@ -98,7 +99,9 @@ namespace Kms.DataLayer.Context
             //	modelBuilder.ApplyConfigurationsFromAssembly(assembly);
 
             base.OnModelCreating(modelBuilder);
+
             SeedData(modelBuilder);
+            modelBuilder.Entity<Top50ContentsSqlRow>().HasNoKey();
 
         }
         #endregion Methods

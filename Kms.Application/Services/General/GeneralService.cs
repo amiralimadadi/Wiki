@@ -8,6 +8,7 @@ using Kms.Application.Services.Account;
 using Kms.Application.Services.Gamifications;
 using Kms.Application.ViewModels;
 using Kms.DataLayer.Contracts;
+using System.Linq;
 using Kms.DataLayer.Repositories;
 using Kms.Domain.Entities.General;
 using Kms.Domain.Entities.KnowledgeContentGroup;
@@ -15,17 +16,32 @@ using Kms.Domain.Entities.ProjectAndProposal;
 using Kms.Domain.Entities.QuestionAndAnswer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using Common.SqlDto;
+using Kms.DataLayer.Context;
+using Microsoft.Data.SqlClient;
 
 namespace Kms.Application.Services.General
 {
     public class GeneralService : IGeneralService
     {
+        private readonly KmsDbContext _dbContext;
         private readonly IGoalRepository _goalRepository;
         private readonly IAdminRepository _adminRepository;
         private readonly IPageViewRepository _pageViewRepository;
+        private readonly IKnowledgeContentRepository _knowledgeContentRepository;
         private readonly ITagRepository _tagRepository;
         private readonly IUserRepository _userRepository;
+        private readonly ILikeRepository _likeRepository;
+
+        private readonly IProjectCommentRepository _projectCommentRepository;
+        private readonly IProposalCommentRepository _proposalCommentRepository;
+        private readonly IProjectRepository _projectRepository;
+        private readonly IAnswerRepository _answerRepository;
+        private readonly IQuestionRepository _questionRepository;
+
+        private readonly ICommentRepository _commentRepository;
         private readonly IAccountService _accountService;
+        private readonly IProposalRepository _proposalRepository;
         private readonly IMedalRepository _medalRepository;
         private readonly IUnitRepository _unitRepository;
         private readonly PagingOptions _pagingOptions;
@@ -37,10 +53,22 @@ namespace Kms.Application.Services.General
         #region Constructor
 
         public GeneralService(IGoalRepository goalRepository,
+            KmsDbContext dbContext,
             ITagRepository tagRepository,
             IUserRepository userRepository,
             IAdminRepository adminRepository,
             IPageViewRepository pageViewRepository,
+            
+            IProjectCommentRepository projectCommentRepository,
+            IProposalCommentRepository proposalCommentRepository,
+            IProjectRepository projectRepository,
+            IAnswerRepository answerRepository,
+            IQuestionRepository questionRepository,
+
+            IProposalRepository proposalRepository,
+            ILikeRepository likeRepository,
+            ICommentRepository commentRepository,
+            IKnowledgeContentRepository knowledgeContentRepository,
             IMedalRepository medalRepository,
             IUserScoreRepository userScoreRepository,
             ICodeDescriptionRepository codeDescriptionRepository,
@@ -50,10 +78,22 @@ namespace Kms.Application.Services.General
             IProcessProfessionalRepository processProfessionalRepository,
             IAccountService accountService)
         {
+            _dbContext = dbContext;
             _goalRepository = goalRepository;
             _userRepository = userRepository;
             _medalRepository = medalRepository;
             _pageViewRepository = pageViewRepository;
+            _knowledgeContentRepository = knowledgeContentRepository;
+
+            _projectCommentRepository = projectCommentRepository;
+            _proposalCommentRepository = proposalCommentRepository;
+            _projectRepository = projectRepository;
+            _answerRepository = answerRepository;
+            _questionRepository = questionRepository;
+
+            _proposalRepository = proposalRepository;
+            _commentRepository = commentRepository;
+            _likeRepository = likeRepository;
             _userScoreRepository = userScoreRepository;
             _adminRepository = adminRepository;
             _tagRepository = tagRepository;
@@ -926,6 +966,544 @@ namespace Kms.Application.Services.General
 
             return new OperationResult<List<UserProfileViewModel>>(true, topThreeUserScores, string.Empty);
         }
+
+
+        //    public async Task<OperationResult<List<Top50ContentsViewModel>>> GetTop50Contents()
+        //    {
+        //        // 1) گرفتن Top 50 برای هر EntityType از روی PageViews
+
+        //        var allowedEntityTypes = new[]
+        //        {
+        //    "Question",
+        //    "KnowledgeContent",
+        //    "Comment",
+        //    "Proposal",
+        //    "Project"
+        //};
+
+        //        var pageViewsQuery = _pageViewRepository.GetEntityAsNoTracking()
+        //            .Where(p => p.IsActive && !p.IsDeleted && allowedEntityTypes.Contains(p.EntityType))
+        //            .AsQueryable();
+
+        //        var grouped = await (
+        //            from pv in pageViewsQuery
+        //            group pv by new { pv.EntityType, pv.EntityId } into g
+        //            select new
+        //            {
+        //                EntityType = g.Key.EntityType,   // string
+        //                g.Key.EntityId,
+        //                PageViewCount = g.Count()
+        //            }
+        //        ).ToListAsync();
+
+        //        var top50PerType = grouped
+        //            .GroupBy(x => x.EntityType)
+        //            .SelectMany(g => g
+        //                .OrderByDescending(x => x.PageViewCount)
+        //                .ThenBy(x => x.EntityId)
+        //                .Take(50))
+        //            .Select(x => new Top50ContentsViewModel
+        //            {
+        //                EntityId = x.EntityId,
+        //                EntityType = Enum.Parse<VisitPageEntityEnum>(x.EntityType),
+        //                PageViewCount = x.PageViewCount,
+        //                Title = string.Empty,
+        //                CreatedDate = default,
+        //                LikeCount = 0,
+        //                CommentCount = 0,
+        //                IsLiked = null,
+        //                IsConfirm = null,
+        //                User = null,
+        //                Attachments = new List<AttachmentViewModel>(),
+        //                Tags = new List<TagsViewModel>()
+        //            })
+        //            .ToList();
+
+        //        // 2) پر کردن Title و CreatedDate برای Question
+
+        //        var questionIds = top50PerType
+        //            .Where(x => x.EntityType == VisitPageEntityEnum.Question)
+        //            .Select(x => x.EntityId)
+        //            .Distinct()
+        //            .ToList();
+
+        //        if (questionIds.Any())
+        //        {
+        //            var questions = await _questionRepository.GetEntityAsNoTracking()
+        //                .Where(q => questionIds.Contains(q.Id))
+        //                .Select(q => new
+        //                {
+        //                    q.Id,
+        //                    q.QuestionTitle,
+        //                    q.CreatedDate
+        //                })
+        //                .ToListAsync();
+
+        //            var questionDict = questions.ToDictionary(q => q.Id, q => q);
+
+        //            foreach (var item in top50PerType.Where(x => x.EntityType == VisitPageEntityEnum.Question))
+        //            {
+        //                if (questionDict.TryGetValue(item.EntityId, out var q))
+        //                {
+        //                    item.Title = q.QuestionTitle;
+        //                    item.CreatedDate = q.CreatedDate;
+        //                }
+        //            }
+        //        }
+
+        //        // 3) پر کردن Title و CreatedDate برای KnowledgeContent
+
+        //        var knowledgeItemsIds = top50PerType
+        //            .Where(x => x.EntityType == VisitPageEntityEnum.KnowledgeContent)
+        //            .Select(x => x.EntityId)
+        //            .Distinct()
+        //            .ToList();
+
+        //        if (knowledgeItemsIds.Any())
+        //        {
+        //            var knowledgeContents = await _knowledgeContentRepository.GetEntityAsNoTracking()
+        //                .Where(k => knowledgeItemsIds.Contains(k.Id))
+        //                .Select(k => new
+        //                {
+        //                    k.Id,
+        //                    k.Title,
+        //                    k.CreatedDate
+        //                })
+        //                .ToListAsync();
+
+        //            var knowledgeDict = knowledgeContents.ToDictionary(k => k.Id, k => k);
+
+        //            foreach (var item in top50PerType.Where(x => x.EntityType == VisitPageEntityEnum.KnowledgeContent))
+        //            {
+        //                if (knowledgeDict.TryGetValue(item.EntityId, out var k))
+        //                {
+        //                    item.Title = k.Title;
+        //                    item.CreatedDate = k.CreatedDate;
+        //                }
+        //            }
+        //        }
+
+        //        // 4) پر کردن Title و CreatedDate برای Proposal
+
+        //        var proposalIds = top50PerType
+        //            .Where(x => x.EntityType == VisitPageEntityEnum.Proposal)
+        //            .Select(x => x.EntityId)
+        //            .Distinct()
+        //            .ToList();
+
+        //        if (proposalIds.Any())
+        //        {
+        //            var proposals = await _proposalRepository.GetEntityAsNoTracking()
+        //                .Where(p => proposalIds.Contains(p.Id))
+        //                .Select(p => new
+        //                {
+        //                    p.Id,
+        //                    p.Title,
+        //                    p.CreatedDate
+        //                })
+        //                .ToListAsync();
+
+        //            var proposalDict = proposals.ToDictionary(p => p.Id, p => p);
+
+        //            foreach (var item in top50PerType.Where(x => x.EntityType == VisitPageEntityEnum.Proposal))
+        //            {
+        //                if (proposalDict.TryGetValue(item.EntityId, out var p))
+        //                {
+        //                    item.Title = p.Title;
+        //                    item.CreatedDate = p.CreatedDate;
+        //                }
+        //            }
+        //        }
+
+        //        // 5) پر کردن Title و CreatedDate برای Project
+
+        //        var projectIds = top50PerType
+        //            .Where(x => x.EntityType == VisitPageEntityEnum.Project)
+        //            .Select(x => x.EntityId)
+        //            .Distinct()
+        //            .ToList();
+
+        //        if (projectIds.Any())
+        //        {
+        //            var projects = await _projectRepository.GetEntityAsNoTracking()
+        //                .Where(p => projectIds.Contains(p.Id))
+        //                .Select(p => new
+        //                {
+        //                    p.Id,
+        //                    p.Title,
+        //                    p.CreatedDate
+        //                })
+        //                .ToListAsync();
+
+        //            var projectDict = projects.ToDictionary(p => p.Id, p => p);
+
+        //            foreach (var item in top50PerType.Where(x => x.EntityType == VisitPageEntityEnum.Project))
+        //            {
+        //                if (projectDict.TryGetValue(item.EntityId, out var p))
+        //                {
+        //                    item.Title = p.Title;
+        //                    item.CreatedDate = p.CreatedDate;
+        //                }
+        //            }
+        //        }
+
+        //        // (برای EntityType = Comment فرض کردم Title خاصی نمی‌خوای؛ اگر خواستی می‌تونیم از خودش هم پر کنیم)
+
+        //        // 6) پر کردن LikeCount برای همه EntityType ها از روی Likes
+
+        //        var likeEntityTypes = top50PerType
+        //            .Select(x => x.EntityType.ToString()) // "Question", "KnowledgeContent", ...
+        //            .Distinct()
+        //            .ToList();
+
+        //        var likeEntityIds = top50PerType
+        //            .Select(x => x.EntityId)
+        //            .Distinct()
+        //            .ToList();
+
+        //        var likes = await _likeRepository.GetEntityAsNoTracking()
+        //            .Where(s => s.IsActive && !s.IsDeleted
+        //                        && likeEntityTypes.Contains(s.EntityType)
+        //                        && likeEntityIds.Contains(s.EntityId))
+        //            .ToListAsync();
+
+        //        var likeDict = likes
+        //            .GroupBy(s => new { s.EntityType, s.EntityId })
+        //            .ToDictionary(
+        //                g => new { g.Key.EntityType, g.Key.EntityId },
+        //                g => g.Count()
+        //            );
+
+        //        foreach (var item in top50PerType)
+        //        {
+        //            var key = new { EntityType = item.EntityType.ToString(), EntityId = item.EntityId };
+
+        //            if (likeDict.TryGetValue(key, out var likeCount))
+        //                item.LikeCount = likeCount;
+        //            else
+        //                item.LikeCount = 0;
+        //        }
+
+        //        // 7) پر کردن CommentCount برای Question (از Answer)
+
+        //        var questionIdsForAnswers = top50PerType
+        //            .Where(x => x.EntityType == VisitPageEntityEnum.Question)
+        //            .Select(x => x.EntityId)
+        //            .Distinct()
+        //            .ToList();
+
+        //        if (questionIdsForAnswers.Any())
+        //        {
+        //            var answers = await _answerRepository.GetEntityAsNoTracking()
+        //                .Where(a => questionIdsForAnswers.Contains(a.QuestionId)
+        //                            && a.IsActive && !a.IsDeleted)
+        //                .ToListAsync();
+
+        //            var answerDict = answers
+        //                .GroupBy(a => a.QuestionId)
+        //                .ToDictionary(
+        //                    g => g.Key,
+        //                    g => g.Count()
+        //                );
+
+        //            foreach (var item in top50PerType.Where(x => x.EntityType == VisitPageEntityEnum.Question))
+        //            {
+        //                if (answerDict.TryGetValue(item.EntityId, out var count))
+        //                    item.CommentCount = count;
+        //                else
+        //                    item.CommentCount = 0;
+        //            }
+        //        }
+
+        //        // 8) پر کردن CommentCount برای KnowledgeContent (از Comment)
+
+        //        var knowledgeCommentIds = top50PerType
+        //            .Where(x => x.EntityType == VisitPageEntityEnum.KnowledgeContent)
+        //            .Select(x => x.EntityId)
+        //            .Distinct()
+        //            .ToList();
+
+        //        if (knowledgeCommentIds.Any())
+        //        {
+        //            var comments = await _commentRepository.GetEntityAsNoTracking()
+        //                .Where(c => knowledgeCommentIds.Contains(c.KnowledgeContentId)
+        //                            && c.IsActive && !c.IsDeleted)
+        //                .ToListAsync();
+
+        //            var commentDict = comments
+        //                .GroupBy(c => c.KnowledgeContentId)
+        //                .ToDictionary(
+        //                    g => g.Key,
+        //                    g => g.Count()
+        //                );
+
+        //            foreach (var item in top50PerType.Where(x => x.EntityType == VisitPageEntityEnum.KnowledgeContent))
+        //            {
+        //                if (commentDict.TryGetValue(item.EntityId, out var count))
+        //                    item.CommentCount = count;
+        //                else
+        //                    item.CommentCount = 0;
+        //            }
+        //        }
+
+        //        // 9) پر کردن CommentCount برای Proposal (از ProposalComment)
+
+        //        var proposalCommentIds = top50PerType
+        //            .Where(x => x.EntityType == VisitPageEntityEnum.Proposal)
+        //            .Select(x => x.EntityId)
+        //            .Distinct()
+        //            .ToList();
+
+        //        if (proposalCommentIds.Any())
+        //        {
+        //            var proposalComments = await _proposalCommentRepository.GetEntityAsNoTracking()
+        //                .Where(pc => proposalCommentIds.Contains(pc.ProposalId)
+        //                             && pc.IsActive && !pc.IsDeleted)
+        //                .ToListAsync();
+
+        //            var proposalCommentDict = proposalComments
+        //                .GroupBy(pc => pc.ProposalId)
+        //                .ToDictionary(
+        //                    g => g.Key,
+        //                    g => g.Count()
+        //                );
+
+        //            foreach (var item in top50PerType.Where(x => x.EntityType == VisitPageEntityEnum.Proposal))
+        //            {
+        //                if (proposalCommentDict.TryGetValue(item.EntityId, out var count))
+        //                    item.CommentCount = count;
+        //                else
+        //                    item.CommentCount = 0;
+        //            }
+        //        }
+
+        //        // 10) پر کردن CommentCount برای Project (از ProjectComment)
+
+        //        var projectCommentIds = top50PerType
+        //            .Where(x => x.EntityType == VisitPageEntityEnum.Project)
+        //            .Select(x => x.EntityId)
+        //            .Distinct()
+        //            .ToList();
+
+        //        if (projectCommentIds.Any())
+        //        {
+        //            var projectComments = await _projectCommentRepository.GetEntityAsNoTracking()
+        //                .Where(pc => projectCommentIds.Contains(pc.ProjectId)
+        //                             && pc.IsActive && !pc.IsDeleted)
+        //                .ToListAsync();
+
+        //            var projectCommentDict = projectComments
+        //                .GroupBy(pc => pc.ProjectId)
+        //                .ToDictionary(
+        //                    g => g.Key,
+        //                    g => g.Count()
+        //                );
+
+        //            foreach (var item in top50PerType.Where(x => x.EntityType == VisitPageEntityEnum.Project))
+        //            {
+        //                if (projectCommentDict.TryGetValue(item.EntityId, out var count))
+        //                    item.CommentCount = count;
+        //                else
+        //                    item.CommentCount = 0;
+        //            }
+        //        }
+
+        //        // 11) مرتب‌سازی نهایی بر اساس PageViewCount
+
+        //        top50PerType = top50PerType
+        //            .OrderByDescending(x => x.PageViewCount)
+        //            .ThenBy(x => x.EntityType)
+        //            .ThenBy(x => x.EntityId)
+        //            .ToList();
+
+        //        return new OperationResult<List<Top50ContentsViewModel>>(true, top50PerType, string.Empty);
+        //    }
+
+
+        public async Task<OperationResult<List<Top50ContentsViewModel>>> GetTop50Contents()
+        {
+            var currentUserId = _accountService.GetUserId();
+            const string sql = @"
+;WITH PvAgg AS (
+    SELECT
+        pv.EntityType,
+        pv.EntityId,
+        COUNT(1) AS PageViewCount
+    FROM PageViews pv
+    WHERE pv.IsActive = 1 AND pv.IsDeleted = 0
+      AND pv.EntityType IN ('Question','KnowledgeContent','Comment','Proposal','Project')
+    GROUP BY pv.EntityType, pv.EntityId
+),
+TopPerType AS (
+    SELECT
+        a.*,
+        ROW_NUMBER() OVER (PARTITION BY a.EntityType ORDER BY a.PageViewCount DESC, a.EntityId) AS rn
+    FROM PvAgg a
+),
+Top50 AS (
+    SELECT EntityType, EntityId, PageViewCount
+    FROM TopPerType
+    WHERE rn <= 50
+),
+ContentUnion AS (
+    SELECT
+        'Question' AS EntityType,
+        q.Id AS EntityId,
+        q.QuestionTitle AS Title,
+        CAST(q.QuestionText AS nvarchar(max)) AS [Text],
+        q.CreatedDate,
+        q.UserId
+    FROM Questions q
+    WHERE q.IsActive = 1 AND q.IsDeleted = 0
+
+    UNION ALL
+
+    SELECT
+        'KnowledgeContent',
+        k.Id,
+        k.Title,
+        CAST(k.Abstract AS nvarchar(max)) AS [Text],
+        k.CreatedDate,
+        k.UserId
+    FROM KnowledgeContents k
+    WHERE k.IsActive = 1 AND k.IsDeleted = 0
+
+    UNION ALL
+
+    SELECT
+        'Proposal',
+        p.Id,
+        p.Title,
+        CAST(p.Abstract AS nvarchar(max)) AS [Text],
+        p.CreatedDate,
+        p.UserId
+    FROM Proposals p
+    WHERE p.IsActive = 1 AND p.IsDeleted = 0
+
+    UNION ALL
+
+    SELECT
+        'Project',
+        pr.Id,
+        pr.Title,
+        CAST(pr.Abstract AS nvarchar(max)) AS [Text],
+        pr.CreatedDate,
+        pr.UserId
+    FROM Projects pr
+    WHERE pr.IsActive = 1 AND pr.IsDeleted = 0
+),
+LikesAgg AS (
+    SELECT l.EntityType, l.EntityId, COUNT(1) AS LikeCount
+    FROM Likes l
+    WHERE l.IsActive = 1 AND l.IsDeleted = 0
+    GROUP BY l.EntityType, l.EntityId
+),
+CommentAgg AS (
+    SELECT 'Question' AS EntityType, a.QuestionId AS EntityId, COUNT(1) AS CommentCount
+    FROM Answers a
+    WHERE a.IsActive = 1 AND a.IsDeleted = 0
+    GROUP BY a.QuestionId
+
+    UNION ALL
+    SELECT 'KnowledgeContent', c.KnowledgeContentId, COUNT(1)
+    FROM Comments c
+    WHERE c.IsActive = 1 AND c.IsDeleted = 0
+    GROUP BY c.KnowledgeContentId
+
+    UNION ALL
+    SELECT 'Proposal', pc.ProposalId, COUNT(1)
+    FROM ProposalComments pc
+    WHERE pc.IsActive = 1 AND pc.IsDeleted = 0
+    GROUP BY pc.ProposalId
+
+    UNION ALL
+    SELECT 'Project', prc.ProjectId, COUNT(1)
+    FROM ProjectComments prc
+    WHERE prc.IsActive = 1 AND prc.IsDeleted = 0
+    GROUP BY prc.ProjectId
+)
+SELECT
+    t.EntityType,
+    t.EntityId,
+    t.PageViewCount,
+
+    ISNULL(cu.Title, '') AS Title,
+    CASE
+    WHEN cu.[Text] IS NULL THEN ''
+    WHEN LEN(cu.[Text]) > 200 THEN LEFT(cu.[Text], 200) + '...'
+    ELSE cu.[Text]
+END AS [Text],
+
+    ISNULL(cu.CreatedDate, '1900-01-01') AS CreatedDate,
+
+    ISNULL(la.LikeCount, 0) AS LikeCount,
+    ISNULL(ca.CommentCount, 0) AS CommentCount,
+
+    cu.UserId AS UserId,
+    u.FullName AS FullName,
+CASE 
+    WHEN EXISTS (
+        SELECT 1
+        FROM Likes l2
+        WHERE l2.IsActive = 1 
+          AND l2.IsDeleted = 0
+          AND l2.UserId = @CurrentUserId
+          AND l2.EntityType = t.EntityType
+          AND l2.EntityId = t.EntityId
+    )
+    THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END AS IsLiked
+
+FROM Top50 t
+LEFT JOIN ContentUnion cu
+    ON cu.EntityType = t.EntityType AND cu.EntityId = t.EntityId
+LEFT JOIN Users u
+    ON u.Id = cu.UserId
+LEFT JOIN LikesAgg la
+    ON la.EntityType = t.EntityType AND la.EntityId = t.EntityId
+LEFT JOIN CommentAgg ca
+    ON ca.EntityType = t.EntityType AND ca.EntityId = t.EntityId
+ORDER BY t.PageViewCount DESC, t.EntityType, t.EntityId;
+";
+
+            var rows = await _dbContext.Set<Top50ContentsSqlRow>()
+                .FromSqlRaw(
+                    sql,
+                    new SqlParameter("@CurrentUserId", currentUserId)
+                )
+                .AsNoTracking()
+                .ToListAsync();
+
+
+            var result = rows.Select(r => new Top50ContentsViewModel
+            {
+                EntityId = r.EntityId,
+                EntityType = Enum.Parse<VisitPageEntityEnum>(r.EntityType),
+                PageViewCount = r.PageViewCount,
+                Title = r.Title,
+                Text = r.Text ?? "",               
+                CreatedDate = r.CreatedDate,
+                LikeCount = r.LikeCount,
+                CommentCount = r.CommentCount,
+
+               User = r.UserId == null ? null : new UserViewModel
+                {
+                    Id = r.UserId.Value,
+                    FullName = r.FullName 
+                },
+
+                IsLiked = r.IsLiked,
+
+                IsConfirm = null,
+                Attachments = new List<AttachmentViewModel>(),
+                Tags = new List<TagsViewModel>()
+            }).ToList();
+
+            return new OperationResult<List<Top50ContentsViewModel>>(true, result, string.Empty);
+        }
+
+
 
         public Medals? GetMedalForScore(decimal score)
         {

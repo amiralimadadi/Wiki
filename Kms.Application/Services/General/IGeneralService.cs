@@ -55,6 +55,9 @@ namespace Kms.Application.Services.General
         Medals? GetMedalForScore(decimal score);
 
 
+        Task<OperationResult<List<Top50ContentsViewModel>>> GetTop50Contents();
+
+
 
 
     }
