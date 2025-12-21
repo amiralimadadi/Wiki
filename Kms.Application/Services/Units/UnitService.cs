@@ -182,7 +182,7 @@ namespace Kms.Application.Services.Units
                 throw new Exception("خطا در دریافت داده‌های واحد. لطفاً دوباره تلاش کنید.");
             }
             var firstItem = igtResponse.data.FirstOrDefault();
-            if (firstItem != null && firstItem.levelCode == 6)
+            if (firstItem != null && firstItem.levelCode == 3)
             {
                 return true;
             }

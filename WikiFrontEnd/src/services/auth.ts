@@ -513,7 +513,7 @@ export { getBestUsers };
 const getProfileDataForCurrent = async () => {
   try {
     const response = await api.get(
-      "https://wikiapi.tipax.ir/api/General/GetProfileDataForCurrentUser"
+      "General/GetProfileDataForCurrentUser"
     );
 
     if (!response.data) {
