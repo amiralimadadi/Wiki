@@ -1,12 +1,15 @@
 import axios from "axios";
 // 📁 src/config/api.ts
 
-export const baseUrlForDownload = "http://192.168.168.13:6066";
+//export const baseUrlForDownload = "http://192.168.168.13:6066";
 //export const baseUrlForDownload = "http://172.30.1.48:6066";
+export const baseUrlForDownload = "https://wikiapi.tipax.ir";
 
 const api = axios.create({
-baseURL: "http://192.168.168.13:6066/api/",
+//baseURL: "http://192.168.168.13:6066/api/",
 //baseURL: "http://172.30.1.48:6066/api/",
+baseURL: "https://wikiapi.tipax.ir/api",
+
   headers: { "Content-Type": "application/json" },
 });
 

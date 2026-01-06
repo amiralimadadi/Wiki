@@ -454,7 +454,7 @@ const AllKnowledge: React.FC<AllKnowledgeProps> = ({ articles }) => {
             <Title
               className="font-yekan"
               level={5}
-              style={{ color: "#007041" }}
+              style={{ color: "#007041", height: 67, fontSize: 16.5 }}
             >
               {item.title}
             </Title>
@@ -466,8 +466,13 @@ const AllKnowledge: React.FC<AllKnowledgeProps> = ({ articles }) => {
                 style={{
                   background: "#F7F7F8",
                   borderRadius: 8,
-                  display: "flex",
                   padding: "1rem",
+
+                  // ارتفاع ثابت برای یکسان شدن همه کارت‌ها
+                  height: 160,
+                  overflow: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
                 }}
               >
                 <Text
@@ -476,24 +481,43 @@ const AllKnowledge: React.FC<AllKnowledgeProps> = ({ articles }) => {
                 >
                   چکیده:
                 </Text>
-                <Paragraph style={{ fontSize: 12.25, color: "#333" }}>
+
+                <Paragraph
+                  className="font-yekan"
+                  style={{
+                    fontSize: 12.25,
+                    color: "#333",
+                    margin: 0,
+                    textAlign: "justify",
+                    direction: "rtl",
+
+                    // محدود به 5 خط + ...
+                    overflow: "hidden",
+                    display: "-webkit-box",
+                    WebkitBoxOrient: "vertical",
+                    WebkitLineClamp: 5,
+
+                    lineHeight: "1.7",
+                  }}
+                >
                   {item.abstract}
                 </Paragraph>
               </div>
             )}
 
+
             {/* Footer */}
             <div
               style={{
-                 display: "flex",
-    justifyContent: "flex-start",
-    alignItems: "center",
-    marginTop: "0.75rem",
-    direction: "ltr",
+                display: "flex",
+                justifyContent: "flex-start",
+                alignItems: "center",
+                marginTop: "0.75rem",
+                direction: "ltr",
               }}
             >
               <Space size={8}>
-                                <Space
+                <Space
                   className="bg-[#F0F0F0] font-yekan"
                   style={{
                     padding: "4px 8px",
@@ -506,7 +530,7 @@ const AllKnowledge: React.FC<AllKnowledgeProps> = ({ articles }) => {
                     {toPersianDigits(item.pageViewCount ?? 0)}
                   </Text>
                 </Space>
-           
+
 
                 <Space
                   className="font-yekan"
@@ -577,7 +601,7 @@ const AllKnowledge: React.FC<AllKnowledgeProps> = ({ articles }) => {
                 )}
 
 
-     {item.knowledgeContentType?.trim().toLowerCase() ===
+                {item.knowledgeContentType?.trim().toLowerCase() ===
                   "nonstructured" ? (
                   <Space
                     className="bg-[#fbfbfb] hover:bg-gray-200"

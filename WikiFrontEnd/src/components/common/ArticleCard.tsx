@@ -19,10 +19,6 @@ import { baseUrlForDownload } from "../../configs/api";
 import CommentIcon from "../../svgs/CommentIcon";
 import { useEffect, useState } from "react";
 import TextArea from "antd/es/input/TextArea";
-import ArrowsIcon from "../../svgs/ArrowsIcon";
-import PrintIcon from "../../svgs/PrintIcon";
-import { useNavigate } from "react-router-dom";
-
 import {
   createComment,
   getComments,
@@ -33,11 +29,11 @@ import {
   UnlikeComment,
   searchFormName,
 } from "../../services/auth";
-import CustomIcon from "../../svgs/CustomIcon";
+
 import gregorianToJalali from "../../helpers/createDate";
 import IconPdf from "../../svgs/IconPdf";
 
-const { Text } = Typography;
+const { Paragraph, Text } = Typography;
 export interface GetCommentsResponse {
   data: CommentType[];
 }
@@ -59,7 +55,7 @@ interface Props {
   liked?: boolean;
   likeCount?: number;
   showActions?: boolean;
-  onOpenStructuredForm?: (item: Articles) => void;
+   onOpenStructuredForm?: (article: Articles) => void;
 }
 
 export interface Mention {
@@ -81,9 +77,7 @@ const sanitizeTag = (t: string) =>
 
 const uniq = (arr: string[]) => Array.from(new Set(arr.filter(Boolean)));
 
-const ArticleCard: React.FC<Props> = ({ item, onOpenStructuredForm }) => {
-
-   const navigate = useNavigate();
+const ArticleCard: React.FC<Props> = ({ item }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [, setFileName] = useState("");
@@ -111,11 +105,11 @@ const ArticleCard: React.FC<Props> = ({ item, onOpenStructuredForm }) => {
 
   const [selectedCommentTags, setSelectedCommentTags] = useState<string[]>([]);
 
-const handleCommentTagsChange = (value: string[]) => {
-  const cleaned = uniq(value.map(sanitizeTag)).filter(v => v.length > 0);
-  setSelectedCommentTags(cleaned);
-  form.setFieldsValue({ tags: cleaned });
-};
+  const handleCommentTagsChange = (value: string[]) => {
+    const cleaned = uniq(value.map(sanitizeTag)).filter(v => v.length > 0);
+    setSelectedCommentTags(cleaned);
+    form.setFieldsValue({ tags: cleaned });
+  };
 
 
   useEffect(() => {
@@ -330,20 +324,20 @@ const handleCommentTagsChange = (value: string[]) => {
         (m: { value: number; label: string }) => m.value
       );
 
-       // ← تگ‌های خام از فرم یا state
-    const rawTags: string[] = values.tags || selectedCommentTags || [];
-    const cleanedTags = uniq(rawTags.map(sanitizeTag)).filter(v => v.length > 0);
-    if (cleanedTags.length === 0) {
-      form.setFields([{ name: "tags", errors: ["حداقل یک تگ انتخاب یا اضافه کنید."] }]);
-      return;
-    }
+      // ← تگ‌های خام از فرم یا state
+      const rawTags: string[] = values.tags || selectedCommentTags || [];
+      const cleanedTags = uniq(rawTags.map(sanitizeTag)).filter(v => v.length > 0);
+      if (cleanedTags.length === 0) {
+        form.setFields([{ name: "tags", errors: ["حداقل یک تگ انتخاب یا اضافه کنید."] }]);
+        return;
+      }
 
       await createComment({
         commentText: values.comment,
         userId,
         knowledgeContentId: localItem.id,
         mentionUserIds,
-        tags: cleanedTags,  
+        tags: cleanedTags,
         commentAttachments: files,     // ← فقط آرایه فایل‌ها رو بده
       });
 
@@ -363,35 +357,7 @@ const handleCommentTagsChange = (value: string[]) => {
     }
   };
 
-  const handleDownloadFile = async (atta) => {
-    if (!cleanToken) {
-      alert("ابتدا وارد حساب کاربری خود شوید");
-      return;
-    }
 
-    try {
-      const response = await fetch(`https://wikiapi.tipax.ir/${atta.address}`, {
-        headers: {
-          Authorization: cleanToken,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`خطا در دانلود فایل: ${response.status}`);
-      }
-
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = atta.name || "file.pdf";
-      a.click();
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error("Download error:", error);
-      alert("دانلود فایل با خطا مواجه شد");
-    }
-  };
 
   return (
     <div className="w-[1000px] h-fit font-yekan">
@@ -463,7 +429,7 @@ const handleCommentTagsChange = (value: string[]) => {
               className="font-yekan"
               style={{ fontSize: 11, color: "#000000A6" }}
             >
-             درس آموخته
+              درس آموخته
             </Text>
           </Space>
         ) : item.knowledgeContentType === "NonStructured" ? (
@@ -480,40 +446,76 @@ const handleCommentTagsChange = (value: string[]) => {
       </div>
 
       <div
-        className={`${localItem.abstract ? "block" : "hidden"
-          } mt-4 flex flex-col`}
+        className="flex flex-col gap-1"
+        style={{
+          background: "#F7F7F8",
+          borderRadius: 8,
+          display: "flex",
+          padding: "1rem",
+        }}
       >
-        <p className="text-[13.25px] text-[#333333]">چکیده :</p>
-        <p className="text-[13.25px] text-[#333333]"> {localItem.abstract}</p>
-      </div>
-      <div className="text-[14px] text-[#333333] font-yekan leading-8 font-semibold mt-[2rem]">
-        <p className="w-[86%] text-justify">{item.text}</p>
+        <Text
+          className="font-yekan"
+          style={{ fontSize: 12.25, color: "#333" }}
+        >
+          چکیده:
+        </Text>
+        <Paragraph style={{ fontSize: 12.25, color: "#333" }}>
+          {item.abstract}
+        </Paragraph>
       </div>
 
-       {item.attachments.map((atta) =>
-                  atta?.address ? (
-                    <a
-                      key={atta.id}
-                      href={`${baseUrlForDownload}${atta.address}`}
-                      download={atta.name}
-                      target="_blank"
-                      rel="noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="flex items-center justify-between gap-10 w-fit mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl"
-                      style={{ direction: "ltr" }}
-                    >
-                      <div className="flex items-center gap-1 text-[1rem]">
-                        <span className="block overflow-clip">
-                          {atta.name || "دانلود فایل پیوست"}
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="text-[1rem] font-medium">فایل پیوست</span>
-                        <IconPdf size={22} />
-                      </div>
-                    </a>
-                  ) : null
-                )}
+      <div className="mb-[2rem] mt-[2rem]">
+        <Paragraph
+          className="font-yekan font-semibold"
+          style={{
+            fontSize: 14,
+            width: "85%",
+            color: "#424242",
+            marginBottom: 0,
+            lineHeight: "2.25em",
+            textAlign: "justify",
+            whiteSpace: "pre-line",
+
+            display: "-webkit-box",
+            WebkitBoxOrient: "vertical",
+            WebkitLineClamp: 4,     // تعداد خطوطی که می‌خوای نمایش بده
+            overflow: "hidden",     // مهم: جلوی ریختن روی بقیه را می‌گیرد
+          }}
+        >
+          {item.text}
+        </Paragraph>
+
+      </div>
+      {/* <div className="text-[14px] text-[#333333] font-yekan leading-8 font-semibold mt-[2rem]">
+        <p className="w-[79%]">{item.text}</p>
+      </div> */}
+
+            {/* Attachments */}
+            {item.attachments.map((atta) =>
+              atta?.address ? (
+                <a
+                  key={atta.id}
+                  href={`${baseUrlForDownload}${atta.address}`}
+                  download={atta.name}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center justify-between gap-10 w-fit mt-4 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl"
+                  style={{ direction: "ltr" }}
+                >
+                  <div className="flex items-center gap-1 text-[1rem]">
+                    <span className="block overflow-clip">
+                      {atta.name || "دانلود فایل پیوست"}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[1rem] font-medium">فایل پیوست</span>
+                    <IconPdf size={22} />
+                  </div>
+                </a>
+              ) : null
+            )}
 
       {item.mentions && item.mentions.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-4">
@@ -533,12 +535,24 @@ const handleCommentTagsChange = (value: string[]) => {
 
 
       <div className="flex flex-wrap gap-2 mt-4 justify-between">
-        <div className="flex items-center gap-1">
+
+
+
+
+        <div className="flex flex-wrap items-center gap-1 mt-2" style={{ direction: "rtl" }}>
           {localItem.tags.map((items, index) => (
-            <p key={index} className="flex">
-              #{items.tagTitle}
-            </p>
+
+            <span key={index}
+              className="inline-flex items-center text-[11px] text-[#333333]"
+            >
+              <span className="text-[15px] ml-1">#</span>
+              <span>{items.tagTitle}</span>
+            </span>
+
+
           ))}
+
+
         </div>
         <div className="flex flex-row-reverse items-center gap-3">
           {localItem.isLiked ? (
@@ -571,7 +585,7 @@ const handleCommentTagsChange = (value: string[]) => {
               {loadingLike === localItem.id ? (
                 <Spin size="small" />
               ) : (
-                <LikeIcon size={12.24} color="#000000A6" className="group-hover:fill-white"/>
+                <LikeIcon size={12.24} color="#000000A6" className="group-hover:fill-white" />
               )}
               <Text className="font-yekan text-[#000000A6] group-hover:text-white">
                 {toPersianDigits(localItem.likeCount || "0")}
@@ -583,33 +597,6 @@ const handleCommentTagsChange = (value: string[]) => {
             <CommentIcon size={12.24} />
             <p>{toPersianDigits(commentsGet?.data?.length || "0")}</p>
           </div>
-
-          {/* 👇 دکمه تبدیل / پرینت کنار like و comment */}
-   {localItem.knowledgeContentType?.trim().toLowerCase() ===
-"nonstructured" ? (
-  <div
-    onClick={(e) => {
-      e.stopPropagation();
-      onOpenStructuredForm?.(localItem); // 👈 اینجا والد رو صدا می‌زنیم
-    }}
-    className="flex items-center gap-1 bg-[#fbfbfb] hover:bg-gray-200 px-2 py-1 rounded-lg cursor-pointer"
-  >
-    <ArrowsIcon size={12.24} color="#000000A6" />
-    <span className="text-[13px] text-[#000000A6]">تبدیل</span>
-  </div>
-) : (
-  <div
-    onClick={(e) => {
-      e.stopPropagation();
-      navigate(`/knowledgeContentPrint/${localItem.id}`); // 👈 این یکی مستقیم ناوبری می‌کنه
-    }}
-    className="flex items-center gap-1 bg-[#F0F0F0] hover:bg-gray-200 px-2 py-1 rounded-lg cursor-pointer"
-  >
-    <PrintIcon size={12.24} color="#000000A6" />
-    <span className="text-[13px] text-[#000000A6]">پرینت</span>
-  </div>
-)}
-
         </div>
       </div>
 
@@ -669,10 +656,10 @@ const handleCommentTagsChange = (value: string[]) => {
                 className="font-yekan rounded-xl hover:custom-select  custom-input"
                 popupMatchSelectWidth={false}
                 placement="bottomLeft"
-                 value={selectedCommentTags}
-                 onChange={handleCommentTagsChange}
-    tokenSeparators={[",", "،", ";", "؛"]} // جداکننده‌های فارسی/انگلیسی
-    maxTagCount="responsive"
+                value={selectedCommentTags}
+                onChange={handleCommentTagsChange}
+                tokenSeparators={[",", "،", ";", "؛"]} // جداکننده‌های فارسی/انگلیسی
+                maxTagCount="responsive"
               >
                 {tags.map((tag, index) => (
                   <Select.Option key={index} value={tag.tagTitle}>
@@ -730,7 +717,7 @@ const handleCommentTagsChange = (value: string[]) => {
                     }
                     title="حذف"
                   >
-                     <DeleteIcon />
+                    <DeleteIcon />
                   </button>
                 </span>
               ))}
@@ -828,19 +815,19 @@ const handleCommentTagsChange = (value: string[]) => {
                 ) : null
               )}
               {comment.mentions && comment.mentions.length > 0 && (
-                     <div className="flex flex-wrap gap-1 my-2">
-                       {comment.mentions.map((mention: Mention, index: number) => (
-                         <div
-                           key={mention.userId ?? index}
-                           className="flex items-center gap-1 bg-gray-100 px-2 py-[2px] rounded-lg border border-gray-300"
-                         >
-                           <p className="text-[11px] text-[#007041] font-bold">@</p>
-                           <p className="text-[11px] text-[#333] font-semibold">
-                             {mention.fullName}
-                           </p>
-                         </div>
-                       ))}
-                     </div>
+                <div className="flex flex-wrap gap-1 my-2">
+                  {comment.mentions.map((mention: Mention, index: number) => (
+                    <div
+                      key={mention.userId ?? index}
+                      className="flex items-center gap-1 bg-gray-100 px-2 py-[2px] rounded-lg border border-gray-300"
+                    >
+                      <p className="text-[11px] text-[#007041] font-bold">@</p>
+                      <p className="text-[11px] text-[#333] font-semibold">
+                        {mention.fullName}
+                      </p>
+                    </div>
+                  ))}
+                </div>
               )}
 
               <div className="flex justify-between flex-row-reverse">
