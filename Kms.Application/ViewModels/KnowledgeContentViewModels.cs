@@ -107,7 +107,7 @@ namespace Kms.Application.ViewModels
     }
 
 
-    public class Top50ContentsViewModel
+    public class HomeLandingContentsViewModel
     {
         public int EntityId { get; set; }
         public VisitPageEntityEnum EntityType { get; set; }

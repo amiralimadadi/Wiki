@@ -39,7 +39,6 @@ namespace Kms.Application.Services.General
         Task<OperationResult<List<UnitViewModel>>> GetAllUnits();
         Task<OperationResult<UnitViewModel>> AddUnit(UnitViewModel model);
 
-
         Task<OperationResult<List<AdminViewModel>>> GetAllAdmins();
 
         Task<OperationResult<AdminViewModel>> AddUserToAdmins(CreateAdminViewModel model);
@@ -53,12 +52,5 @@ namespace Kms.Application.Services.General
 
         Task<OperationResult<List<UserProfileViewModel>>> GetTopThreeUsersByScore();
         Medals? GetMedalForScore(decimal score);
-
-
-        Task<OperationResult<List<Top50ContentsViewModel>>> GetTop50Contents();
-
-
-
-
     }
 }

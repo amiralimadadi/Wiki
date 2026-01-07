@@ -68,7 +68,7 @@ namespace Kms.IoC.DependencyInjection
 			services.AddScoped<IProjectAndProposalService, ProjectAndProposalService>();
 			services.AddScoped<IGamificationService, GamificationService>();
 			services.AddScoped<INotificationSender, IgtNotificationSender>();
-			services.AddScoped<IHomeLanding, HomeLanding>();
+			services.AddScoped<IHomeLandingService, HomeLandingService>();
 		}
 	}
 }

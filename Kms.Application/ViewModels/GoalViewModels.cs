@@ -64,6 +64,7 @@
         Proposal,
         ProposalComment,
         Project,
-        ProjectComment
+        ProjectComment,
+        UnitDocumentation
     }
 }

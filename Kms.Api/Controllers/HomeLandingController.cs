@@ -13,24 +13,21 @@ namespace Kms.Api.Controllers
     public class HomeLandingController : KmsBaseController
 	{
 		#region Constructor
-		private readonly JwtSetting _jwtSetting;
-        private readonly IHomeLanding _IHomeLanding;
+        private readonly IHomeLandingService _homeLandingService;
 		public HomeLandingController(
-            IOptions<JwtSetting> jwtSetting,
-            IHomeLanding homeLanding
+            
+            IHomeLandingService homeLandingService
             )
 		{
-			_jwtSetting = jwtSetting.Value;
-            _IHomeLanding = homeLanding;
+            _homeLandingService = homeLandingService;
 		}
-		#endregion Constructor
+        #endregion Constructor
 
-		#region Login
 
-		[HttpGet]
-		public async Task<IActionResult> GetmanualSearch(string search)
-		{
-            var result = await _IHomeLanding.GetmanualSearch(search);
+        [HttpGet]
+        public async Task<ActionResult> GetTop50Contents()
+        {
+            var result = await _homeLandingService.GetTop50Contents();
             if (!result.IsSuccess)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, result);
@@ -38,7 +35,16 @@ namespace Kms.Api.Controllers
             return StatusCode(StatusCodes.Status200OK, result);
         }
 
+        [HttpGet]
+		public async Task<IActionResult> GetmanualSearch(string search)
+		{
+            var result = await _homeLandingService.GetmanualSearch(search);
+            if (!result.IsSuccess)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, result);
+            }
+            return StatusCode(StatusCodes.Status200OK, result);
+        }
 	
-        #endregion Login
     }
 }
