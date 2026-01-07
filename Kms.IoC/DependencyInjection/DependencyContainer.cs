@@ -4,6 +4,7 @@ using Kms.Application.Services.Account;
 using Kms.Application.Services.Documentation;
 using Kms.Application.Services.Gamifications;
 using Kms.Application.Services.General;
+using Kms.Application.Services.HomeLanding;
 using Kms.Application.Services.KnowledgeContentGroups;
 using Kms.Application.Services.ProjectAndProposal;
 using Kms.Application.Services.QuestionAndAnswer;
@@ -67,6 +68,7 @@ namespace Kms.IoC.DependencyInjection
 			services.AddScoped<IProjectAndProposalService, ProjectAndProposalService>();
 			services.AddScoped<IGamificationService, GamificationService>();
 			services.AddScoped<INotificationSender, IgtNotificationSender>();
+			services.AddScoped<IHomeLanding, HomeLanding>();
 		}
 	}
 }
