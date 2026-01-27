@@ -20,7 +20,6 @@ import CheckIcon from "../svgs/CheckIcon";
 import { fetchAwaitingConfirmationKnowledgeContent } from "../services/auth";
 import PainPointModal from "../components/common/PainPointModal";
 import ArticleCard from "../components/common/ArticleCard";
-import gregorianToJalali from "../helpers/createDate";
 import IconPdf from "../svgs/IconPdf";
 const { Paragraph, Text, Title } = Typography;
 
@@ -52,7 +51,19 @@ interface Articles {
 }
 
 const PAGE_SIZE_OPTIONS = ["6", "12", "24", "50"];
-
+const formatDate = (d?: string | Date) => {
+  if (!d) return "—";
+  try {
+    const dt = typeof d === "string" ? new Date(d) : d;
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dt);
+  } catch {
+    return typeof d === "string" ? d : "—";
+  }
+};
 const ExpertConfirm = () => {
   const [openConfirmModal, setOpenConfirmModal] = useState<boolean>(false);
   const [openDetailModal, setOpenDetailModal] = useState<boolean>(false);
@@ -264,7 +275,7 @@ const ExpertConfirm = () => {
                 </div>
               </Space>
               <p className="text-[#000000A6] text-[14px]" style={{ margin: 0 }}>
-                {gregorianToJalali(item.createdDate)}
+                {formatDate(item.createdDate)}
               </p>
             </div>
 

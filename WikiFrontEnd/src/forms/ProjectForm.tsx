@@ -38,6 +38,12 @@ const ProjectForm = ({ onClose }: { onClose: () => void }) => {
       return;
     }
 
+    
+ if (!values.files) {
+      message.error("انتخاب حداقل یک فایل برای ثبت پروژه الزامی است.");
+      return;
+    }
+
     try {
       const formData = new FormData();
       const idea = values?.ideaCode?.trim();
@@ -64,6 +70,8 @@ const ProjectForm = ({ onClose }: { onClose: () => void }) => {
         const rc = f.originFileObj as RcFile | undefined;
         if (rc) formData.append("ProjectAttachments", rc, rc.name);
       });
+
+
 
       const { data: res } = await CreateProject(formData, token);
 
@@ -242,7 +250,8 @@ const ProjectForm = ({ onClose }: { onClose: () => void }) => {
               <Select.Option key={index} value={tag.tagTitle}>
                 {tag.tagTitle}
               </Select.Option>
-            ))}
+            ))}`
+            `
           </Select>
         </Form.Item>
 
@@ -254,7 +263,7 @@ const ProjectForm = ({ onClose }: { onClose: () => void }) => {
               valuePropName="fileList"
               getValueFromEvent={(e) => e?.fileList || []}
               noStyle
-              rules={[{ required: true, message: "حداقل یک فایل انتخاب کنید" }]}
+              
             >
               <Upload
                 beforeUpload={() => false}

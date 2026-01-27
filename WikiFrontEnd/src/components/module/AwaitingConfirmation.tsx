@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { UserOutlined } from "@ant-design/icons";
 import { Form, Spin, Input, Button, Modal, message } from "antd";
 import NotFoundIcon from "../../svgs/NotIcon";
-import gregorianToJalali from "../../helpers/createDate";
 import { baseUrlForDownload } from "../../configs/api";
 import IconPdf from "../../svgs/IconPdf";
 import {
@@ -31,7 +30,19 @@ interface Props {
     tagTitle: string;
   }[];
 }
-
+const formatDate = (d?: string | Date) => {
+  if (!d) return "—";
+  try {
+    const dt = typeof d === "string" ? new Date(d) : d;
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dt);
+  } catch {
+    return typeof d === "string" ? d : "—";
+  }
+};
 const AwaitingConfirmation = () => {
   const [items, setItems] = useState<Props[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -150,7 +161,7 @@ const AwaitingConfirmation = () => {
               <div className="flex items-center gap-1 text-xs">
                 <span className="text-[12.5px] ">
                   {data.createdDate
-                    ? gregorianToJalali(data.createdDate)
+                    ? formatDate(data.createdDate)
                     : "تاریخی درج نشده"}
                 </span>
               </div>

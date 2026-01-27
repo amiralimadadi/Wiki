@@ -15,7 +15,6 @@ import {
 } from "../services/auth";
 import toast, { Toaster } from "react-hot-toast";
 import type { QuestionData } from "../types/Interfaces";
-import gregorianToJalali from "../helpers/createDate";
 
 
 type RowData = QuestionData & {
@@ -31,7 +30,19 @@ type RowData = QuestionData & {
   deleted: string; // "بله" | "خیر"
   active: string;  // "بله" | "خیر"
 };
-
+const formatDate = (d?: string | Date) => {
+  if (!d) return "—";
+  try {
+    const dt = typeof d === "string" ? new Date(d) : d;
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dt);
+  } catch {
+    return typeof d === "string" ? d : "—";
+  }
+};
 const PendingQuestions = () => {
   // ---- modal: جزئیات
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -422,7 +433,7 @@ const PendingQuestions = () => {
               <div className="grid grid-cols-2 gap-3 text-xs">
                 <div className="text-gray-600">{currentRow.category }</div>
                 <div className="flex items-center justify-end gap-1 text-gray-600">
-                  {currentRow?.date ? gregorianToJalali(currentRow.date as any) : "—"}
+                  {currentRow?.date ? formatDate(currentRow.date as any) : "—"}
                 </div>
               </div>
 

@@ -2,7 +2,7 @@ function toPersianDigits(input: string | number): string {
   return input.toString().replace(/\d/g, (d) => "۰۱۲۳۴۵۶۷۸۹"[parseInt(d, 10)]);
 }
 
-function gregorianToJalali(gDate: string): string {
+function formatDate(gDate: string): string {
   const [year, month, day] = gDate.split("T")[0].split("-").map(Number);
 
   const gy = year;
@@ -71,4 +71,4 @@ function gregorianToJalali(gDate: string): string {
   return `${toPersianDigits(jy)}/${toPersianDigits(jm)}/${toPersianDigits(jd)}`;
 }
 
-export default gregorianToJalali;
+export default formatDate;

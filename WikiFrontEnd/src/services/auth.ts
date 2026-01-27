@@ -411,18 +411,21 @@ export { MentionedQuestions };
 const getAllProjects = async (
   searchText: string,
   pageNo: number = 1,
-  pageSize: number = 9
+  pageSize: number = 9,
+  goalId?: number | null         
 ) => {
   try {
     const response = await api.get("Project/GetAllProject", {
       params: {
         projectFilter: "AllProject",
         searchText,
-        goalId: "",
+        goalId,
         pageNo,
         pageSize,
+        
       },
-    });
+    }
+  );
 
     return response.data;
   } catch (error) {
@@ -2361,10 +2364,7 @@ const getUnitDocumentationsAwait = async () => {
     throw error;
   }
 };
-
 export { getUnitDocumentationsAwait };
-
-
 
  const acceptDocumentation = async (model: {
   documentationId: number;
@@ -2384,7 +2384,6 @@ export { getUnitDocumentationsAwait };
 
   return res.data; // { isSuccess, data, message, ... }
 };
-
 export { acceptDocumentation  };
 
 const addSubstituteToDepartment = async (userIds: number[]) => {
@@ -2408,10 +2407,7 @@ const addSubstituteToDepartment = async (userIds: number[]) => {
     throw error;
   }
 };
-
-
 export { addSubstituteToDepartment };
-
 
 const CommentProject = async (formData: FormData, token: string) => {
    return await api.post(
@@ -2425,10 +2421,7 @@ formData,
     }
   );
 };
-
 export { CommentProject };
-
-
 
 const getCommentOfProject = async (
   projectId: number,
@@ -2448,7 +2441,6 @@ const getCommentOfProject = async (
     throw error;
   }
 };
-
 export { getCommentOfProject };
 
 const likeProjectComment = async (
@@ -2491,7 +2483,6 @@ const likeProjectComment = async (
     return { success: false, message: error.message };
   }
 };
-
 export { likeProjectComment };
 
 const unlikeProjectComment = async (
@@ -2534,7 +2525,6 @@ const unlikeProjectComment = async (
     return { success: false, message: error.message };
   }
 };
-
 export { unlikeProjectComment };
 
 
@@ -2578,7 +2568,6 @@ const likeProject = async (
     return { success: false, message: error.message };
   }
 };
-
 export { likeProject };
 
 const unLikeProject = async (
@@ -2621,7 +2610,6 @@ const unLikeProject = async (
     return { success: false, message: error.message };
   }
 };
-
 export { unLikeProject };
 
 
@@ -2869,7 +2857,6 @@ const unlikeQuestion = async (
 };
 export { unlikeQuestion };
 
-
 const likeAnswer = async (
   entityId: number,
   userId: number,
@@ -2955,8 +2942,6 @@ const unlikeAnswer = async (
 };
 export { unlikeAnswer };
 
-
-
 const addVisitPageView = async (
   entityId: number,
   userId: number,
@@ -3001,9 +2986,6 @@ const addVisitPageView = async (
 
 export { addVisitPageView };
 
-
-
-
 //----------  Documentation ----------------
 
 const CreateUnitDocumentation = async (formData: FormData, token: string) => {
@@ -3018,13 +3000,11 @@ const CreateUnitDocumentation = async (formData: FormData, token: string) => {
     }
   );
 };
-
 export { CreateUnitDocumentation };
-
 
 const getTop50Content = async () => {
   try {
-    const response = await api.get("General/GetTop50Contents");
+    const response = await api.get("HomeLanding/GetTop50Contents");
 
     if (response.data) {
       return { success: true, data: response.data };
@@ -3036,6 +3016,31 @@ const getTop50Content = async () => {
     return { success: false, message: error.message };
   }
 };
-
 export { getTop50Content };
+
+const GetManualSearch = async (search: string) => {
+  try {
+    const response = await api.get("HomeLanding/GetmanualSearch",{
+      params:{
+        search 
+      },
+    });
+
+    if (response.data) {
+      return { success: true, data: response.data };
+    } else {
+      return { success: false, message: "No data received" };
+    }
+  } catch (error) {
+    console.error("خطا در دریافت نتیجه جستجو...:", error);
+    return { success: false, message: error.message };
+  }
+};
+
+export { GetManualSearch };
+
+
+
+
+
 

@@ -16,7 +16,6 @@ import type { Articles } from "../types/Interfaces";
 import type { RootState } from "../redux/store";
 
 import { toPersianDigits } from "../utils/persianNu";
-import gregorianToJalali from "../helpers/createDate";
 import { baseUrlForDownload } from "../configs/api";
 
 import {
@@ -28,7 +27,19 @@ import {
 import fa_IR from "antd/lib/locale/fa_IR";
 
 const { Paragraph, Text, Title } = Typography;
-
+const formatDate = (d?: string | Date) => {
+  if (!d) return "—";
+  try {
+    const dt = typeof d === "string" ? new Date(d) : d;
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dt);
+  } catch {
+    return typeof d === "string" ? d : "—";
+  }
+};
 const MyKnowledge = () => {
   const [open, setOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<Articles | null>(null);
@@ -266,7 +277,7 @@ return (
                       </div>
                     </div>
                     <p className="text-[#000000A6] text-[14px]" style={{ margin: 0 }}>
-                      {gregorianToJalali(item.createdDate)}
+                      {formatDate(item.createdDate)}
                     </p>
                   </Space>
                 </div>

@@ -20,7 +20,6 @@ import type { Question } from "../types/Interfaces";
 import { toPersianDigits } from "../utils/persianNu";
 const { Paragraph, Text } = Typography;
 import fa_IR from "antd/lib/locale/fa_IR";
-import gregorianToJalali from "../helpers/createDate";
 import { ConfigProvider } from "antd";
 import {
   getAllQuestions,
@@ -38,7 +37,19 @@ interface Mention {
   userId: number;
   fullName: string;
 }
-
+const formatDate = (d?: string | Date) => {
+  if (!d) return "—";
+  try {
+    const dt = typeof d === "string" ? new Date(d) : d;
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dt);
+  } catch {
+    return typeof d === "string" ? d : "—";
+  }
+};
 const AllQuastion = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<Question | null>(null);
@@ -483,7 +494,7 @@ const AllQuastion = () => {
                   className="text-[#000000A6] text-[14px]"
                   style={{ margin: 0 }}
                 >
-                  {gregorianToJalali(item.createdDate)}
+                  {formatDate(item.createdDate)}
                 </p>
               </div>
             </div>

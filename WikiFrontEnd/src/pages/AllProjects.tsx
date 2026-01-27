@@ -7,8 +7,8 @@ import {
   type PaginationProps,
   Spin,
 } from "antd";
-
-import { useEffect, useState , useCallback } from "react";
+import { useSelector } from "react-redux";
+import { useEffect, useState, useCallback } from "react";
 import CommentIcon from "../svgs/CommentIcon";
 import LikeIcon from "../svgs/LikeIcon";
 import UserIcon from "../svgs/UserIcon";
@@ -26,7 +26,7 @@ import {
 import { baseUrlForDownload } from "../configs/api";
 import IconPdf from "../svgs/IconPdf";
 import ArticleCardProject from "../components/common/ArticleCardProject";
-import gregorianToJalali from "../helpers/createDate";
+import type { RootState } from "../redux/store";
 
 export interface Attachment {
   id: number;
@@ -34,50 +34,86 @@ export interface Attachment {
   address: string;
 }
 
-
+const formatDate = (d?: string | Date) => {
+  if (!d) return "—";
+  try {
+    const dt = typeof d === "string" ? new Date(d) : d;
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dt);
+  } catch {
+    return typeof d === "string" ? d : "—";
+  }
+};
 const AllProjects = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<Project | null>(null);
-  const [currentPage, setCurrentPage] = useState<number>(1);
-  const [articles, setArticles] = useState<Project[]>([]);
-  const [pageSize, setPageSize] = useState<number>(9);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<boolean>(false);
-  const [pageCount, setPageCount] = useState<number>(1);
-  const [totalQuestions, setTotalQuestions] = useState<number>(0);
 
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(9);
+
+  const [loading, setLoading] = useState<boolean>(true);
   const [loadingLike, setLoadingLike] = useState<number | null>(null);
+
+  const [articles, setLocalArticles] = useState<Project[]>([]);
+  const [, setPageCount] = useState<number>(1);
+  const [totalQuestions, setTotalCount] = useState<number>(0);
+
+  const [error, ] = useState<boolean>(false);
 
   const users = JSON.parse(localStorage.getItem("user") || "{}");
   const userId = users?.id;
   const token = localStorage.getItem("sessionId");
   const cleanToken = token?.startsWith("Bearer ") ? token : `Bearer ${token}`;
 
-  
-const fetchProjects = useCallback(async (page = 1, size = 9, q = "") => {
-  try {
-    setLoading(true);
-    const res = await getAllProjects(q,page, size); // ← اگر سرویس‌ات پارامتر می‌گیرد
-    const data: Project[] = res.data ?? [];
+    const searchResults = useSelector((state: RootState) => state.search.results);
+    const searchParams = new URLSearchParams(location.search);
+  const searchTextFromUrl = searchParams.get("searchText") || "";
 
-    setArticles(data);
-    setPageCount(res.pagingInfo?.pageCount ?? 1);
-    setTotalQuestions(
-      res.pagingInfo?.totalItems ?? res.pagingInfo?.totalCount ?? data.length
-    );
-    setError(false);
-  } catch (e) {
-    console.error(e);
-    setError(true);
-  } finally {
-    setLoading(false);
-  }
-}, []);
+  const isSearchMode =
+    searchResults &&
+    searchResults.length > 0 &&
+    searchTextFromUrl.trim() !== "";
 
-useEffect(() => {
-  fetchProjects(currentPage, pageSize);
-}, [currentPage, pageSize, fetchProjects]);
+  const fetchProjects = useCallback(
+    async (pageNo: number = 1, pageSizeParam: number = 9, goalId?: number) => {
+      try {
+        setLoading(true);
 
+        const response = await getAllProjects(
+          "",
+          pageNo,
+          pageSizeParam,
+          goalId
+        );
+
+        const articlesData: Project[] = response.data ?? [];
+        const paging = response?.pagingInfo || null;
+
+        setLocalArticles(articlesData);
+        if (paging) {
+          setPageCount(paging.pageCount);
+          setTotalCount(paging.allEntitiesCount);
+        }
+        else {
+          setPageCount(1);
+          setTotalCount(0);
+        }
+      } catch (e) {
+        console.error("Error fetching data:", error);
+        setLocalArticles([]);
+        setPageCount(1);
+        setTotalCount(0);
+      } finally {
+        setLoading(false);
+      }
+    }, []);
+
+  useEffect(() => {
+    fetchProjects(currentPage, pageSize);
+  }, [currentPage, pageSize, fetchProjects]);
 
 
 useEffect(() => {
@@ -122,7 +158,7 @@ const handlePageChange = (page: number, newPageSize?: number) => {
     setLoadingLike(id);
     try {
       // ابتدا UI را آپدیت می‌کنیم
-      setArticles((prevArticles) =>
+      setLocalArticles((prevArticles) =>
         prevArticles.map((article) =>
           article.id === id
             ? {
@@ -139,7 +175,7 @@ const handlePageChange = (page: number, newPageSize?: number) => {
 
       // اگر سرور خطا داد، تغییرات را بازگردانید
       if (!result.success) {
-        setArticles((prevArticles) =>
+        setLocalArticles((prevArticles) =>
           prevArticles.map((article) =>
             article.id === id
               ? {
@@ -155,7 +191,7 @@ const handlePageChange = (page: number, newPageSize?: number) => {
     } catch (error) {
       console.error("Error in like:", error);
       // در صورت خطا، تغییرات را بازگردانید
-      setArticles((prevArticles) =>
+      setLocalArticles((prevArticles) =>
         prevArticles.map((article) =>
           article.id === id
             ? {
@@ -181,7 +217,7 @@ const handlePageChange = (page: number, newPageSize?: number) => {
     setLoadingLike(id);
     try {
       // ابتدا UI را آپدیت می‌کنیم
-      setArticles((prevArticles) =>
+      setLocalArticles((prevArticles) =>
         prevArticles.map((article) =>
           article.id === id
             ? {
@@ -198,7 +234,7 @@ const handlePageChange = (page: number, newPageSize?: number) => {
 
       // اگر سرور خطا داد، تغییرات را بازگردانید
       if (!result.success) {
-        setArticles((prevArticles) =>
+        setLocalArticles((prevArticles) =>
           prevArticles.map((article) =>
             article.id === id
               ? {
@@ -214,7 +250,7 @@ const handlePageChange = (page: number, newPageSize?: number) => {
     } catch (error) {
       console.error("Error in unlike:", error);
       // در صورت خطا، تغییرات را بازگردانید
-      setArticles((prevArticles) =>
+      setLocalArticles((prevArticles) =>
         prevArticles.map((article) =>
           article.id === id
             ? {
@@ -365,7 +401,7 @@ if (loading) {
                 </Text>
               </Space>
               <p className="text-[#000000A6] text-[14px]" style={{ margin: 0 }}>
-                {gregorianToJalali(item.createdDate)}
+                {formatDate(item.createdDate)}
               </p>
             </div>
 
@@ -536,7 +572,7 @@ if (loading) {
         ))}
       </Space>
       {/* پاگینیشن فارسی‌شده */}
-      {pageCount > 1 && (
+      {!isSearchMode && (
         <div
           className="bg-white p-4 rounded-xl flex"
           style={{
@@ -608,7 +644,7 @@ if (loading) {
   item={selectedArticle}
   showActions={true}
   onProjectChange={(updated) => {
-    setArticles(prev => prev.map(a => (a.id === updated.id ? updated : a)));
+    setLocalArticles(prev => prev.map(a => (a.id === updated.id ? updated : a)));
     setSelectedArticle(updated);
   }}
 />

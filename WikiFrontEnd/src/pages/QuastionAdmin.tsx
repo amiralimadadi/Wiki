@@ -31,7 +31,6 @@ import {
 } from "../services/auth";
 import type { Tag, User } from "../forms/CreateKnowledgeContent";
 import { Toaster, toast } from "react-hot-toast";
-import gregorianToJalali from "../helpers/createDate";
 import NoDataIcon from "../iconSaidbar/NoDataIcon";
 import MoadlContentReuseble from "../components/common/MoadlContentReuseble";
 
@@ -52,7 +51,19 @@ interface Question {
   createdDate: string;
   user: User;
 }
-
+const formatDate = (d?: string | Date) => {
+  if (!d) return "—";
+  try {
+    const dt = typeof d === "string" ? new Date(d) : d;
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dt);
+  } catch {
+    return typeof d === "string" ? d : "—";
+  }
+};
 
 const QuestionsList = () => {
   const [form] = Form.useForm();
@@ -126,7 +137,7 @@ const QuestionsList = () => {
         likesCount: q.likeCount,
         userName: q.userName ?? q.user?.fullName ?? "—",
         createdDate: q.createdDate
-          ? gregorianToJalali(q.createdDate)     // اگر می‌خوای جلالی باشه
+          ? formatDate(q.createdDate)     // اگر می‌خوای جلالی باشه
           : "—",
       }));
 
@@ -282,7 +293,7 @@ const QuestionsList = () => {
         answersCount: q.answersCount,
         likesCount: q.likesCount,
         userName: q.userName ?? q.user?.fullName ?? "—",
-        createdDate: q.createdDate ? gregorianToJalali(q.createdDate) : "—",
+        createdDate: q.createdDate ? formatDate(q.createdDate) : "—",
       }));
 
       setQuestionsData(mapped);
@@ -311,7 +322,7 @@ const QuestionsList = () => {
         answersCount: q.answersCount,
         likesCount: q.likesCount,
         userName: q.userName ?? q.user?.fullName ?? "—",
-        createdDate: q.createdDate ? gregorianToJalali(q.createdDate) : "—",
+        createdDate: q.createdDate ? formatDate(q.createdDate) : "—",
       }));
 
       setQuestionsData(mapped);

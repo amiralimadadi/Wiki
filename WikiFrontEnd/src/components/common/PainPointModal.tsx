@@ -5,7 +5,6 @@ import { confirmKnowledgeContent } from "../../services/auth";
 import toast, { Toaster } from "react-hot-toast";
 // import { toPersianDigits } from "../../utils/persianNu";
 import StarIcon from "../../svgs/StarIcon";
-import gregorianToJalali from "../../helpers/createDate";
 const { Title, Text, Paragraph } = Typography;
 
 interface Articles {
@@ -27,7 +26,19 @@ interface PainPointModalProps {
   article: Articles | null;
   onSuccess: (confirmedId: number) => void;
 }
-
+const formatDate = (d?: string | Date) => {
+  if (!d) return "—";
+  try {
+    const dt = typeof d === "string" ? new Date(d) : d;
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dt);
+  } catch {
+    return typeof d === "string" ? d : "—";
+  }
+};
 const PainPointModal: React.FC<PainPointModalProps> = ({
   open,
   onClose,
@@ -97,7 +108,7 @@ const PainPointModal: React.FC<PainPointModalProps> = ({
             </Text>
           </div>
           <Text className="font-yekan" style={{ fontSize: 14, color: "#666" }}>
-            {gregorianToJalali(article.createdDate)}
+            {formatDate(article.createdDate)}
           </Text>
         </div>
         <p className="text-[#007041] text-[14px] font-bold">{article.title}</p>

@@ -25,14 +25,25 @@ import {
 import { baseUrlForDownload } from "../configs/api";
 import IconPdf from "../svgs/IconPdf";
 import ArticleCardProject from "../components/common/ArticleCardProject";
-import gregorianToJalali from "../helpers/createDate";
 
 export interface Attachment {
   id: number;
   name: string;
   address: string;
 }
-
+const formatDate = (d?: string | Date) => {
+  if (!d) return "—";
+  try {
+    const dt = typeof d === "string" ? new Date(d) : d;
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dt);
+  } catch {
+    return typeof d === "string" ? d : "—";
+  }
+};
 const MyProject = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<Project | null>(null);
@@ -355,7 +366,7 @@ const MyProject = () => {
                 </Text>
               </Space>
               <p className="text-[#000000A6] text-[14px]" style={{ margin: 0 }}>
-                {gregorianToJalali(item.createdDate)}
+                {formatDate(item.createdDate)}
               </p>
             </div>
 

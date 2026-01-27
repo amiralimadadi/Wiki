@@ -47,7 +47,7 @@ interface AllKnowledgeProps {
 
 const { Paragraph, Text, Title } = Typography;
 
-const AllKnowledge: React.FC<AllKnowledgeProps> = ({ articles }) => {
+const AllKnowledge: React.FC<AllKnowledgeProps> = ({  }) => {
 
   const [open, setOpen] = useState(false);
   const [selectedArticle, setSelectedArticle] = useState<Articles | null>(null);

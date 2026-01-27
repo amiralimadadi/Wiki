@@ -28,7 +28,6 @@ import {
   unlikeAnswer,
   searchFormName,
 } from "../../services/auth";
-import gregorianToJalali from "../../helpers/createDate";
 import CustomIcon from "../../svgs/CustomIcon";
 import IconPdf from "../../svgs/IconPdf";
 
@@ -78,6 +77,19 @@ const sanitizeTag = (t: string) =>
 
 const uniq = (arr: string[]) => Array.from(new Set(arr.filter(Boolean)));
 
+const formatDate = (d?: string | Date) => {
+  if (!d) return "—";
+  try {
+    const dt = typeof d === "string" ? new Date(d) : d;
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dt);
+  } catch {
+    return typeof d === "string" ? d : "—";
+  }
+};
 
 const ArticleCardQuastion: React.FC<Props> = ({ item }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -725,7 +737,7 @@ const ArticleCardQuastion: React.FC<Props> = ({ item }) => {
                         fontWeight: 600,
                       }}
                     >
-                      {item.user.fullName}
+                      {comment.user.fullName}
                     </Text>
                   </div>
                 </div>
@@ -734,7 +746,7 @@ const ArticleCardQuastion: React.FC<Props> = ({ item }) => {
                     className="text-[#000000A6] text-[14px]"
                     style={{ margin: 0 }}
                   >
-                    {gregorianToJalali(comment.createdDate)}
+                    {formatDate(comment.createdDate)}
                   </p>
                 </div>
               </div>

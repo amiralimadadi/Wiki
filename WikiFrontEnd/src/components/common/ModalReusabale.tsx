@@ -9,7 +9,6 @@ import UserIcon from "../../svgs/UserIcon";
 import type { Comment } from "../../pages/ArticleCardProject";
 import CommentFormModal from "./CommentFormModal";
 import { getCommentsAnuser, sendLike, sendUnlike } from "../../services/auth";
-import gregorianToJalali from "../../helpers/createDate";
 import StarIcon from "../../svgs/StarIcon";
 import IconPdf from "../../svgs/IconPdf";
 
@@ -39,7 +38,19 @@ interface ModalContentProps {
 
   onCommentSubmit?: () => void;
 }
-
+const formatDate = (d?: string | Date) => {
+  if (!d) return "—";
+  try {
+    const dt = typeof d === "string" ? new Date(d) : d;
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dt);
+  } catch {
+    return typeof d === "string" ? d : "—";
+  }
+};
 const ModalReusabale: React.FC<ModalContentProps> = ({
   open,
   onClose,
@@ -133,7 +144,7 @@ const ModalReusabale: React.FC<ModalContentProps> = ({
     [comments]
   );
 
-  const formattedDate = createdDate ? gregorianToJalali(createdDate) : "—";
+  const formattedDate = createdDate ? formatDate(createdDate) : "—";
 
   const typeBadge = useMemo(() => {
     if (type === "Structured") {

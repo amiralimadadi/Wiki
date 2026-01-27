@@ -30,7 +30,6 @@ import {
   searchFormName,
 } from "../../services/auth";
 
-import gregorianToJalali from "../../helpers/createDate";
 import IconPdf from "../../svgs/IconPdf";
 
 const { Paragraph, Text } = Typography;
@@ -76,7 +75,19 @@ const sanitizeTag = (t: string) =>
   t?.toString()?.trim().replace(/^#+/, "").replace(/\s+/g, " ") || "";
 
 const uniq = (arr: string[]) => Array.from(new Set(arr.filter(Boolean)));
-
+const formatDate = (d?: string | Date) => {
+  if (!d) return "—";
+  try {
+    const dt = typeof d === "string" ? new Date(d) : d;
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dt);
+  } catch {
+    return typeof d === "string" ? d : "—";
+  }
+};
 const ArticleCard: React.FC<Props> = ({ item }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
@@ -385,7 +396,7 @@ const ArticleCard: React.FC<Props> = ({ item }) => {
         </div>
         <div>
           <p className="text-[#000000A6] text-[14px]" style={{ margin: 0 }}>
-            {gregorianToJalali(item.createdDate)}
+            {formatDate(item.createdDate)}
           </p>
         </div>
       </div>

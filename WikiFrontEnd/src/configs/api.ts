@@ -13,7 +13,7 @@ baseURL: "http://192.168.168.13:6066/api/",
   headers: { "Content-Type": "application/json" },
 });
 
-api.interceptors.request.use(
+api.interceptors.request.use( 
   (req) => {
     const accessToken = localStorage.getItem("sessionId");
 

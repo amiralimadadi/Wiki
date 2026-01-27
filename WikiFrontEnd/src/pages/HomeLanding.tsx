@@ -1,20 +1,19 @@
-import { Button, Card, Col, List, Row, Space, Typography } from "antd";
+import { Input, Spin, Empty, Button, Card, Col, List, Row, Space, Typography, Modal, Form, Select, Divider } from "antd";
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { getTabs } from "../components/common/TabsData";
-import { getTop50Content } from "../services/auth";
+
 import { toPersianDigits } from "../utils/persianNu";
 import { Popover } from "antd";
 import UserIcon from "../svgs/UserIcon";
 import type { dataUserCurrent } from "../types/Interfaces";
 import { UserOutlined } from "@ant-design/icons";
-import { getProfileDataForCurrent } from "../services/auth";
+import { getTop50Content, GetManualSearch, getProfileDataForCurrent } from "../services/auth";
 import ProfilePopoverContent from "../components/common/ProfilePopoverContent";
 import { DownOutlined } from "@ant-design/icons";
 
 import CommentIcon from "../svgs/CommentIcon";
 import ViewIcon from "../svgs/ViewIcon";
-import gregorianToJalali from "../helpers/createDate";
 import { HeartOutlined, HeartFilled } from "@ant-design/icons";
 
 const { Text } = Typography;
@@ -62,6 +61,77 @@ export default function HomeLanding() {
   const [topError, setTopError] = useState<string | null>(null);
   const [topItems, setTopItems] = useState<Top50Item[]>([]);
 
+  const [searchText, setSearchText] = useState("");
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchItems, setSearchItems] = useState<Top50Item[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+
+  // برای fade
+  const [fadeKey, setFadeKey] = useState(0);
+  const [fadeIn, setFadeIn] = useState(true);
+
+  const formatDate = (d?: string | Date) => {
+    if (!d) return "—";
+    try {
+      const dt = typeof d === "string" ? new Date(d) : d;
+      return new Intl.DateTimeFormat("fa-IR", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      }).format(dt);
+    } catch {
+      return typeof d === "string" ? d : "—";
+    }
+  };
+
+  const triggerFadeSwap = () => {
+    setFadeIn(false);
+    window.setTimeout(() => {
+      setFadeKey((k) => k + 1);
+      setFadeIn(true);
+    }, 180); // مدت fade-out
+  };
+
+  useEffect(() => {
+    const q = searchText.trim();
+
+    // وقتی سرچ خالی شد → برگرد به حالت Top50
+    if (!q) {
+      setIsSearching(false);
+      setSearchItems([]);
+      setSearchLoading(false); // ✅ این خیلی مهمه
+      triggerFadeSwap();
+      return;
+    }
+
+    setIsSearching(true);
+    setSearchLoading(true);
+
+    const t = window.setTimeout(async () => {
+      try {
+        const res = await GetManualSearch(q);
+        const payload = res?.data;
+
+        if (!payload?.isSuccess) {
+          setSearchItems([]);
+        } else {
+          setSearchItems(payload.data || []);
+        }
+        triggerFadeSwap();
+      } catch {
+        setSearchItems([]);
+        triggerFadeSwap();
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 400);
+
+    return () => window.clearTimeout(t);
+  }, [searchText]);
+
+
+
+
   useEffect(() => {
     const load = async () => {
       setLoadingTop(true);
@@ -102,11 +172,15 @@ export default function HomeLanding() {
   }, []);
 
   const tiles = useMemo(() => tabs.slice(0, 5), [tabs]);
-  const sortedTop = useMemo(() => {
-    return [...topItems].sort(
-      (a, b) => (b.pageViewCount ?? 0) - (a.pageViewCount ?? 0)
-    );
-  }, [topItems]);
+  const listData = useMemo(() => {
+    const base = isSearching ? searchItems : topItems;
+    return [...base].sort((a, b) => (b.pageViewCount ?? 0) - (a.pageViewCount ?? 0));
+  }, [isSearching, searchItems, topItems]);
+
+
+  const showLoading = isSearching ? searchLoading : loadingTop;
+  const showError = isSearching ? null : topError; // برای سرچ فعلاً خطا رو خالی بگیر یا جدا بساز
+  const showEmpty = isSearching ? (listData.length === 0 && !searchLoading) : (listData.length === 0 && !loadingTop);
 
 
   const badgeStyle: React.CSSProperties = {
@@ -120,6 +194,10 @@ export default function HomeLanding() {
     display: "inline-block",
 
   };
+
+  const [advOpen, setAdvOpen] = useState(false);
+  const [advForm] = Form.useForm();
+
 
   return (
     <div style={{ padding: "24px 0 0 0" }}>
@@ -222,18 +300,24 @@ export default function HomeLanding() {
                       border: "1px solid #d9d9d9",
                       display: "flex",
                       alignItems: "center",
-                      padding: "0 14px",
+                      padding: "0 6px",
                       background: "#ffffff",
-                      cursor: "pointer",
                     }}
                   >
-                    <span style={{ color: "#8c8c8c", fontSize: 13 }}>
-                      🔍 جستجو...
-                    </span>
+                    <Input
+                      value={searchText}
+                      onChange={(e) => setSearchText(e.target.value)}
+                      placeholder="🔍 جستجو..."
+                      bordered={false}
+                      allowClear
+                      style={{ fontSize: 13 }}
+                    />
                   </div>
+
 
                   {/* جستجوی پیشرفته */}
                   <div
+                    onClick={() => setAdvOpen(true)}
                     style={{
                       height: 44,
                       padding: "0 16px",
@@ -248,10 +332,12 @@ export default function HomeLanding() {
                       fontWeight: 600,
                       cursor: "pointer",
                       whiteSpace: "nowrap",
+                      userSelect: "none",
                     }}
                   >
                     جستجوی پیشرفته
                   </div>
+
                 </div>
 
                 <Row gutter={[12, 12]} justify="center">
@@ -286,27 +372,41 @@ export default function HomeLanding() {
               className="top50-card"
               style={{ borderRadius: 16, background: "transparent", borderColor: "transparent" }}
             >
-              {!loadingTop && !topError && (
-                <div
-                  className="top50-scroll"
-                  style={{
-                    maxHeight: "83vh",
-                    overflowY: "auto",
-                    paddingLeft: 15,
-                  }}
-                >
+
+              <div
+                className="top50-scroll"
+                style={{
+                  maxHeight: "83vh",
+                  overflowY: "auto",
+                  paddingLeft: 15,
+                  transition: "opacity 180ms ease, transform 180ms ease",
+                  opacity: fadeIn ? 1 : 0,
+                  transform: fadeIn ? "translateY(0px)" : "translateY(6px)",
+                }}
+                key={fadeKey}
+              >
+                {showLoading ? (
+                  <div style={{ padding: 24, display: "flex", justifyContent: "center" }}>
+                    <Spin />
+                  </div>
+                ) : showError ? (
+                  <div style={{ padding: 24 }}>
+                    <Empty description={showError} />
+                  </div>
+                ) : showEmpty ? (
+                  <div style={{ padding: 24 }}>
+                    <Empty description={isSearching ? "نتیجه‌ای یافت نشد" : "موردی برای نمایش نیست"} />
+                  </div>
+                ) : (
                   <List
-                    dataSource={sortedTop}
+                    dataSource={listData}
                     renderItem={(x) => (
                       <List.Item style={{ padding: 5, border: "none" }}>
                         <Card
                           style={{ width: "100%", borderRadius: 16, position: "relative" }}
                           hoverable
                         >
-
-
                           <Space direction="vertical" size={6} style={{ width: "100%" }}>
-
                             <Space className="flex justify-between items-center w-full">
                               <div className="flex items-center gap-1 justify-between w-full">
                                 <div className="flex items-center gap-1">
@@ -328,7 +428,7 @@ export default function HomeLanding() {
                                   className="text-[#000000A6] text-[14px]"
                                   style={{ margin: 0 }}
                                 >
-                                  {gregorianToJalali(x.createdDate)}
+                                  {formatDate(x.createdDate)}
                                 </p>
                               </div>
                             </Space>
@@ -398,12 +498,152 @@ export default function HomeLanding() {
                       </List.Item>
                     )}
                   />
-                </div>
-              )}
+                )}
+              </div>
+
             </Card>
           </Col>
         </Row>
       </div>
+
+      {/* ✅ مودال را اینجا بگذار (داخل return، بعد از Row) */}
+      <Modal
+        open={advOpen}
+        onCancel={() => setAdvOpen(false)}
+        title={<span className="font-yekan">جستجوی پیشرفته</span>}
+        width={900}
+        centered
+        destroyOnClose
+        styles={{
+          body: {
+            maxHeight: "70vh",
+            overflowY: "auto",
+            paddingTop: 8,
+          },
+        }}
+        footer={[
+          <Button key="reset" onClick={() => advForm.resetFields()} className="font-yekan">
+            پاک کردن
+          </Button>,
+          <Button key="cancel" onClick={() => setAdvOpen(false)} className="font-yekan">
+            بستن
+          </Button>,
+          <Button
+            key="ok"
+            type="primary"
+            onClick={() => {
+              const values = advForm.getFieldsValue();
+              console.log("ADV SEARCH VALUES:", values);
+              setAdvOpen(false);
+            }}
+            className="font-yekan"
+            style={{ background: "#118656", borderColor: "#118656" }}
+          >
+            جستجو
+          </Button>,
+        ]}
+      >
+        <Form
+          form={advForm}
+          layout="vertical"
+          className="fmt-2 font-yekan csstom-form"
+          style={{ direction: "rtl", font: "BYekan" }}
+        >
+
+          <Row gutter={[12, 12]}>
+            <Col xs={24} md={12}>
+              <Form.Item label="نام کاربر" name="userFullName">
+                <Input className="custom-input" placeholder="" />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item label="عنوان" name="title">
+                <Input className="custom-input" placeholder="عنوان..." />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item label="چکیده" name="abstract">
+                <Input className="custom-input" placeholder="چکیده..." />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item label="تگ" name="tag">
+                <Select className="custom-select" mode="tags" placeholder="تگ‌ها را وارد کنید" tokenSeparators={[",", "،"]} />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item label="مرجع" name="source">
+                <Input className="custom-input" placeholder="مرجع..." />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item label="ارجاع" name="reference">
+                <Input className="custom-input" placeholder="ارجاع..." />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24}>
+              <Form.Item label="متن" name="text">
+                <Input.TextArea rows={3} placeholder="متن..." />
+              </Form.Item>
+            </Col>
+
+            <Divider style={{ margin: "6px 0" }} />
+
+            <Col xs={24} md={12}>
+              <Form.Item label="نام فایل" name="fileName">
+                <Input className="custom-input" placeholder="مثلاً report.pdf" />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item label="عنوان پرسش" name="questionTitle">
+                <Input className="custom-input" placeholder="عنوان پرسش..." />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24}>
+              <Form.Item label="متن پرسش" name="questionText">
+                <Input.TextArea rows={3} placeholder="متن پرسش..." />
+              </Form.Item>
+            </Col>
+
+            <Divider style={{ margin: "6px 0" }} />
+
+            <Col xs={24} md={8}>
+              <Form.Item label="کد ایده" name="ideaCode">
+                <Input className="custom-input" placeholder="کد ایده..." />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={8}>
+              <Form.Item label="کد طرح" name="planCode">
+                <Input className="custom-input" placeholder="کد طرح..." />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={8}>
+              <Form.Item label="کد پروژه" name="projectCode">
+                <Input className="custom-input" placeholder="کد پروژه..." />
+              </Form.Item>
+            </Col>
+
+            <Col xs={24} md={12}>
+              <Form.Item label="گروه کاری" name="workGroup">
+                <Input className="custom-input" placeholder="گروه کاری..." />
+              </Form.Item>
+            </Col>
+          </Row>
+        </Form>
+      </Modal>
     </div>
   );
+
+
+
 }

@@ -1,10 +1,22 @@
 import { useRef } from "react";
 import type { Articles } from "../types/Interfaces";
-import gregorianToJalali from "../helpers/createDate";
 
 interface Props {
   article: Articles;
 }
+const formatDate = (d?: string | Date) => {
+  if (!d) return "—";
+  try {
+    const dt = typeof d === "string" ? new Date(d) : d;
+    return new Intl.DateTimeFormat("fa-IR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(dt);
+  } catch {
+    return typeof d === "string" ? d : "—";
+  }
+};
 const PrintPage: React.FC<Props> = ({ article }) => {
   const printRef = useRef<HTMLDivElement>(null);
 
@@ -128,7 +140,7 @@ const PrintPage: React.FC<Props> = ({ article }) => {
           </div>
           <div className="w-full sm:w-2/12 flex flex-col items-center justify-center text-xs border-t sm:border-t-0 py-2">
             <span className="font-yekan">تاریخ ثبت :</span>
-            <span className="font-yekan">{gregorianToJalali(article.createdDate)}</span>
+            <span className="font-yekan">{formatDate(article.createdDate)}</span>
 
           </div>
         </div>
