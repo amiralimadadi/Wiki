@@ -18,6 +18,7 @@ namespace Kms.Application.Services.General
 {
     public class GeneralService : IGeneralService
     {
+
         private readonly KmsDbContext _dbContext;
         private readonly IGoalRepository _goalRepository;
         private readonly IAdminRepository _adminRepository;
