@@ -36,7 +36,8 @@ namespace Kms.Application.ViewModels
         public List<TagsViewModel> Tags { get; set; }
         public List<MentionViewModel> Mentions { get; set; }
 		public int? LikeCount { get; set; }
-		public int? AnswerCount { get; set; }
+        public int? PageViewCount { get; set; }
+        public int? AnswerCount { get; set; }
 		public bool? IsLiked { get; set; }
 		public string? MentionUserIds { get; set; }
         public DateTime CreatedDate { get; set; }

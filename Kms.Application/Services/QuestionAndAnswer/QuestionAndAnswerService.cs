@@ -22,6 +22,7 @@ namespace Kms.Application.Services.QuestionAndAnswer
         private readonly IQuestionGoalRepository _questionGoalRepository;
         private readonly IGoalRepository _goalRepository;
         private readonly IAnswerRepository _answerRepository;
+        private readonly IPageViewRepository _pageViewRepository;
         private readonly IUserRepository _userRepository;
         private readonly ILikeRepository _likeRepository;
         private readonly ITagRepository _tagRepository;
@@ -41,7 +42,7 @@ namespace Kms.Application.Services.QuestionAndAnswer
 
         #region Constructor
         public QuestionAndAnswerService(IQuestionRepository questionRepository, IQuestionGoalRepository questionGoalRepository,
-            IGoalRepository goalRepository, IAnswerRepository answerRepository, IUserRepository userRepository,
+            IGoalRepository goalRepository, IAnswerRepository answerRepository, IUserRepository userRepository, IPageViewRepository pageViewRepository,
             ILikeRepository likeRepository, ITagRepository tagRepository, IQuestionTagRepository questionTagRepository,
             IMapper mapper, IAttachmentRepository attachmentRepository, IOptions<AttachmentSetting> attachmentSetting,
             IOptions<FileSettings> fileSettings, IAccountService accountService, IGamificationService gamificationService,
@@ -56,6 +57,7 @@ namespace Kms.Application.Services.QuestionAndAnswer
             _answerRepository = answerRepository;
             _userRepository = userRepository;
             _tagRepository = tagRepository;
+            _pageViewRepository = pageViewRepository;
             _questionTagRepository = questionTagRepository;
             _mapper = mapper;
             _attachmentRepository = attachmentRepository;
@@ -373,6 +375,8 @@ namespace Kms.Application.Services.QuestionAndAnswer
                 .Where(s => s.EntityType == "Question" && result.Select(t => t.Id).Contains(s.EntityId)).ToList();
             var tempAttachmentRepo = _attachmentRepository.GetEntityAsNoTracking()
                     .Where(s => s.EntityName == "Question" && result.Select(t => t.Id).Contains(s.EntityId)).ToList();
+            var tempPageViewRepo = _pageViewRepository.GetAllAsNoTrackAsync()
+                .Where(s => s.EntityType == "Question" && result.Select(t => t.Id).Contains(s.EntityId)).ToList();
 
 
             foreach (var res in result)
@@ -405,6 +409,7 @@ namespace Kms.Application.Services.QuestionAndAnswer
                 res.GoalTile = tempGoalRepo.Where(g => g.QuestionId == res.Id).Select(g => g.GoalTitle).ToList();
                 res.AnswerCount = tempAnsRepo.Count(s => s.QuestionId == res.Id);
                 res.LikeCount = tempLikeRepo.Count(s => s.EntityId == res.Id);
+                res.PageViewCount = tempPageViewRepo.Count(s => s.EntityId == res.Id);
                 res.IsLiked = tempLikeRepo.Any(s => s.EntityId == res.Id && s.UserId == userId);
                 res.Attachments = tempAttachmentRepo
                                     .Where(s => s.EntityId == res.Id)

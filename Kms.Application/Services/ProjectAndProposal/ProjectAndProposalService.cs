@@ -1061,6 +1061,10 @@ namespace Kms.Application.Services.ProjectAndProposal
                             && result.Select(t => t.Id).Contains(s.EntityId)).ToList();
             var tempGoalRepo = _goalRepository.GetAllAsNoTrackAsync().Where(s => result.Select(t => t.GoalId).Contains(s.Id)).ToList();
 
+            var tempPageViewRepo = _pageViewRepository.GetAllAsNoTrackAsync()
+                .Where(s => s.EntityType == "Project" && result.Select(t => t.Id).Contains(s.EntityId)).ToList();
+
+
             foreach (var res in result)
             {
 
@@ -1074,7 +1078,7 @@ namespace Kms.Application.Services.ProjectAndProposal
                                                              }).ToList();
                     res.Tags = tempTagViewModels;
                 }
-
+                res.PageViewCount = tempPageViewRepo.Count(s => s.EntityId == res.Id);
                 res.GoalTitle = tempGoalRepo.FirstOrDefault(s => s.Id == res.GoalId)?.GoalTitle;
                 res.CommentCount = tempAnsRepo.Count(s => s.ProjectId == res.Id);
                 res.LikeCount = tempLikeRepo.Count(s => s.EntityId == res.Id);
