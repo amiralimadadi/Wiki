@@ -171,9 +171,9 @@ const AllProposal = () => {
     }
   };
 
-// ------------------ View (آیکون چشم + بازدید) ------------------
+  // ------------------ View (آیکون چشم + بازدید) ------------------
 
-const registerView = async (item: Proposal) => {
+  const registerView = async (item: Proposal) => {
     if (!userId || !cleanToken) return;
 
     try {
@@ -185,9 +185,9 @@ const registerView = async (item: Proposal) => {
           prev.map((article) =>
             article.id === item.id
               ? {
-                  ...article,
-                  pageViewCount: (article.pageViewCount ?? 0) + 1,
-                }
+                ...article,
+                pageViewCount: (article.pageViewCount ?? 0) + 1,
+              }
               : article
           )
         );
@@ -196,9 +196,9 @@ const registerView = async (item: Proposal) => {
         setSelectedArticle((prev) =>
           prev && prev.id === item.id
             ? {
-                ...prev,
-                pageViewCount: (prev.pageViewCount ?? 0) + 1,
-              }
+              ...prev,
+              pageViewCount: (prev.pageViewCount ?? 0) + 1,
+            }
             : prev
         );
       }
@@ -312,7 +312,7 @@ const registerView = async (item: Proposal) => {
   };
 
   return (
-    <>
+    
       <div
         style={{
           display: "flex",
@@ -321,13 +321,13 @@ const registerView = async (item: Proposal) => {
           marginTop: "1rem",
         }}
       >
-    <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(3, 1fr)",
-          gap: "20px",
-          width: "100%",
-        }}
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(3, 1fr)",
+            gap: "20px",
+            width: "100%",
+          }}
         >
           {currentData.map((item) => (
             <Card
@@ -392,28 +392,28 @@ const registerView = async (item: Proposal) => {
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
-                  marginTop:"7px"
+                  marginTop: "7px"
                 }}
               >
                 <Space>
 
-<Space
-  className="bg-[#F0F0F0] font-yekan"
-  style={{
-    padding: "4px 8px",
-    borderRadius: 8,
-    cursor: "pointer",
-  }}
-  onClick={(e) => {
-    e.stopPropagation(); // جلوگیری از باز شدن کارت
-    handleViewClick(item);
-  }}
->
-  <ViewIcon size={12.24} color="#000000A6" />
-  <Text className="font-yekan" style={{ fontSize: 13, color: "#000000A6" }}>
-    {toPersianDigits(item.pageViewCount ?? 0)}
-  </Text>
-</Space>
+                  <Space
+                    className="bg-[#F0F0F0] font-yekan"
+                    style={{
+                      padding: "4px 8px",
+                      borderRadius: 8,
+                      cursor: "pointer",
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation(); // جلوگیری از باز شدن کارت
+                      handleViewClick(item);
+                    }}
+                  >
+                    <ViewIcon size={12.24} color="#000000A6" />
+                    <Text className="font-yekan" style={{ fontSize: 13, color: "#000000A6" }}>
+                      {toPersianDigits(item.pageViewCount ?? 0)}
+                    </Text>
+                  </Space>
 
 
 
@@ -524,48 +524,48 @@ const registerView = async (item: Proposal) => {
         )}
 
         {/* مودال */}
-      <Modal
-  open={open}
-  onCancel={handleClose}
-  footer={null}
-  closable={true}
-  centered
-  width="auto"
-  bodyStyle={{
-    padding: 0,
-    background: "transparent",
-    boxShadow: "none",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-  }}
-  style={{
-    background: "transparent",
-    boxShadow: "none",
-  }}
-  maskStyle={{
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
-  }}
->
-  {selectedArticle && (
-    <ArticleCardProposal
-      key={selectedArticle.id}             // کمک می‌کند مودال تمیز رفرش شود
-      item={selectedArticle}
-      showActions={true}
-      onProposalChange={(updated) => {
-        // 1) لیست اصلی را آپدیت کن
-        setArticles(prev =>
-          prev.map(a => (a.id === updated.id ? updated : a))
-        );
-        // 2) خود آیتم انتخاب‌شده در مودال را هم سینک کن
-        setSelectedArticle(updated);
-      }}
-    />
-  )}
-</Modal>
+        <Modal
+          open={open}
+          onCancel={handleClose}
+          footer={null}
+          closable={true}
+          centered
+          width="auto"
+          bodyStyle={{
+            padding: 0,
+            background: "transparent",
+            boxShadow: "none",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+          style={{
+            background: "transparent",
+            boxShadow: "none",
+          }}
+          maskStyle={{
+            backgroundColor: "rgba(0, 0, 0, 0.4)",
+          }}
+        >
+          {selectedArticle && (
+            <ArticleCardProposal
+              key={selectedArticle.id}             // کمک می‌کند مودال تمیز رفرش شود
+              item={selectedArticle}
+              showActions={true}
+              onProposalChange={(updated) => {
+                // 1) لیست اصلی را آپدیت کن
+                setArticles(prev =>
+                  prev.map(a => (a.id === updated.id ? updated : a))
+                );
+                // 2) خود آیتم انتخاب‌شده در مودال را هم سینک کن
+                setSelectedArticle(updated);
+              }}
+            />
+          )}
+        </Modal>
 
       </div>
-    </>
+
   );
 };
 

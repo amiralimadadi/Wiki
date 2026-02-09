@@ -127,6 +127,7 @@ const hideSidebar = hideSidebarPaths.includes(location.pathname);
                     </div>
                   }
                 />
+                <Route path="/home" element={<HomeLanding />} />
                 <Route path="/admin/expertGoal" element={<AdminPage />} />
                 <Route path="/admin/scores" element={<GetProfileDataAll />} />
                 <Route

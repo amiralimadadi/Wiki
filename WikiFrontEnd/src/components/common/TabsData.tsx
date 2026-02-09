@@ -10,6 +10,12 @@ export const getTabs = (activeKey: string, accessList: string[]) => {
 
   return [
     {
+      key: "HomeLanding",
+      label: "صفحه اصلی",
+      icon: <FolderIcon className="icon flex items-center" />,
+      path: "home",
+    },
+    {
       key: "knowledgeContent",
       label: "محتوای دانشی",
       icon: (
@@ -60,18 +66,18 @@ export const getTabs = (activeKey: string, accessList: string[]) => {
       path: "documentation",
     },
 
-    // 🔥 شرط نمایش تب ادمین:
+    //  شرط نمایش تب ادمین:
     ...(hasAccess("Wiki")
       ? [
-          {
-            key: "admin",
-            label: "ادمین ویکی",
-            icon: (
-              <SettingOutlined className="icon flex items-center" />
-            ),
-            path: "admin",
-          },
-        ]
+        {
+          key: "admin",
+          label: "ادمین ویکی",
+          icon: (
+            <SettingOutlined className="icon flex items-center" />
+          ),
+          path: "admin",
+        },
+      ]
       : []),
   ];
 };

@@ -214,7 +214,7 @@ export interface Question {
   answerCount: number;
   isLiked: boolean;
   mentionUserIds: number[] | null;
-
+  pageViewCount?: number;
   goalTitle: null | string;
   createdDate: string;
   commentCount: string;

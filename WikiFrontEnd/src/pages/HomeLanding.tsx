@@ -171,7 +171,7 @@ export default function HomeLanding() {
     getUserDatas();
   }, []);
 
-  const tiles = useMemo(() => tabs.slice(0, 5), [tabs]);
+  const tiles = useMemo(() => tabs.slice(1, 6), [tabs]);
   const listData = useMemo(() => {
     const base = isSearching ? searchItems : topItems;
     return [...base].sort((a, b) => (b.pageViewCount ?? 0) - (a.pageViewCount ?? 0));
@@ -419,7 +419,7 @@ export default function HomeLanding() {
                                       fontWeight: 600,
                                     }}
                                   >
-                                    {x.user.fullName}
+                                    {x.user?.fullName ?? "کاربر نامشخص"}
                                   </Text>
                                 </div>
                               </div>
@@ -506,7 +506,7 @@ export default function HomeLanding() {
         </Row>
       </div>
 
-      {/* ✅ مودال را اینجا بگذار (داخل return، بعد از Row) */}
+
       <Modal
         open={advOpen}
         onCancel={() => setAdvOpen(false)}

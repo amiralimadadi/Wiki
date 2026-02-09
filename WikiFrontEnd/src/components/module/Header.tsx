@@ -23,6 +23,7 @@ function Header() {
 
   // تابعی برای تبدیل آدرس به کلید تب
   const mapPathToTabKey = (path: string): TabKey => {
+    // if (path.startsWith("HomeLanding")) return "HomeLanding"; 
     if (path.startsWith("knowledgeContent")) return "knowledgeContent";
     if (path.startsWith("questions")) return "questions";
     if (path.startsWith("proposal")) return "proposal";
@@ -76,34 +77,6 @@ function Header() {
 
     fetchAccessList();
   }, [userId]);
-
-  // useEffect(() => {
-  //   const fetch = async () => {
-  //     const token = localStorage.getItem("sessionId");
-  //     const user = JSON.parse(localStorage.getItem("user") || "{}");
-
-  //     if (!token || !user.personId) {
-  //       console.warn("توکن یا personId موجود نیست");
-  //       return;
-  //     }
-
-  //     const requestData = { personId: user.personId };
-
-  //     try {
-  //       const response = await getProfilePicture(token, requestData);
-  //       const pictures = response?.data || [];
-
-  //       if (pictures.length > 0) {
-  //         const latestPicPath = pictures[0].path;
-  //         setProfilePicUrl(`https://integrationapi.tipax.ir${latestPicPath}`);
-  //       }
-  //     } catch (err) {
-  //       console.error("خطا در دریافت عکس پروفایل:", err);
-  //     }
-  //   };
-
-  //   fetch();
-  // }, []);
 
   useEffect(() => {
     const fetchNotifications = async () => {

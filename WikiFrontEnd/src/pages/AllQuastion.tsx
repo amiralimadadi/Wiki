@@ -7,7 +7,7 @@ import {
   type PaginationProps,
   Spin,
 } from "antd";
-import  {
+import {
   useEffect,
   useState,
   useCallback,
@@ -15,41 +15,43 @@ import  {
 import { useLocation, useNavigate } from "react-router-dom";
 import CommentIcon from "../svgs/CommentIcon";
 import LikeIcon from "../svgs/LikeIcon";
-import UserIcon from "../svgs/UserIcon";
+import ViewIcon from "../svgs/ViewIcon";
+// import UserIcon from "../svgs/UserIcon";
 import type { Question } from "../types/Interfaces";
 import { toPersianDigits } from "../utils/persianNu";
-const { Paragraph, Text } = Typography;
+const { Paragraph, Text, Title } = Typography;
 import fa_IR from "antd/lib/locale/fa_IR";
 import { ConfigProvider } from "antd";
 import {
   getAllQuestions,
   likeQuestion,
   unlikeQuestion,
+  addVisitPageView
 } from "../services/auth";
-import { baseUrlForDownload } from "../configs/api";
+// import { baseUrlForDownload } from "../configs/api";
 import ArticleCardQuastion from "../components/common/ArticleCardQuastion";
 import NotFoundPage from "../components/module/NotFoundPage";
 import { useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
-import IconPdf from "../svgs/IconPdf";
+// import IconPdf from "../svgs/IconPdf";
 
-interface Mention {
-  userId: number;
-  fullName: string;
-}
-const formatDate = (d?: string | Date) => {
-  if (!d) return "—";
-  try {
-    const dt = typeof d === "string" ? new Date(d) : d;
-    return new Intl.DateTimeFormat("fa-IR", {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).format(dt);
-  } catch {
-    return typeof d === "string" ? d : "—";
-  }
-};
+// interface Mention {
+//   userId: number;
+//   fullName: string;
+// }
+// const formatDate = (d?: string | Date) => {
+//   if (!d) return "—";
+//   try {
+//     const dt = typeof d === "string" ? new Date(d) : d;
+//     return new Intl.DateTimeFormat("fa-IR", {
+//       year: "numeric",
+//       month: "2-digit",
+//       day: "2-digit",
+//     }).format(dt);
+//   } catch {
+//     return typeof d === "string" ? d : "—";
+//   }
+// };
 const AllQuastion = () => {
   const [open, setOpen] = useState<boolean>(false);
   const [selectedArticle, setSelectedArticle] = useState<Question | null>(null);
@@ -224,10 +226,10 @@ const AllQuastion = () => {
         prev.map((article) =>
           article.id === id
             ? {
-                ...article,
-                isLiked: true,
-                likeCount: (article.likeCount || 0) + 1,
-              }
+              ...article,
+              isLiked: true,
+              likeCount: (article.likeCount || 0) + 1,
+            }
             : article
         )
       );
@@ -239,10 +241,10 @@ const AllQuastion = () => {
           prev.map((article) =>
             article.id === id
               ? {
-                  ...article,
-                  isLiked: false,
-                  likeCount: Math.max((article.likeCount || 1) - 1, 0),
-                }
+                ...article,
+                isLiked: false,
+                likeCount: Math.max((article.likeCount || 1) - 1, 0),
+              }
               : article
           )
         );
@@ -255,10 +257,10 @@ const AllQuastion = () => {
         prev.map((article) =>
           article.id === id
             ? {
-                ...article,
-                isLiked: false,
-                likeCount: Math.max((article.likeCount || 1) - 1, 0),
-              }
+              ...article,
+              isLiked: false,
+              likeCount: Math.max((article.likeCount || 1) - 1, 0),
+            }
             : article
         )
       );
@@ -282,10 +284,10 @@ const AllQuastion = () => {
         prev.map((article) =>
           article.id === id
             ? {
-                ...article,
-                isLiked: false,
-                likeCount: Math.max((article.likeCount || 1) - 1, 0),
-              }
+              ...article,
+              isLiked: false,
+              likeCount: Math.max((article.likeCount || 1) - 1, 0),
+            }
             : article
         )
       );
@@ -298,10 +300,10 @@ const AllQuastion = () => {
           prev.map((article) =>
             article.id === id
               ? {
-                  ...article,
-                  isLiked: true,
-                  likeCount: (article.likeCount || 0) + 1,
-                }
+                ...article,
+                isLiked: true,
+                likeCount: (article.likeCount || 0) + 1,
+              }
               : article
           )
         );
@@ -314,10 +316,10 @@ const AllQuastion = () => {
         prev.map((article) =>
           article.id === id
             ? {
-                ...article,
-                isLiked: true,
-                likeCount: (article.likeCount || 0) + 1,
-              }
+              ...article,
+              isLiked: true,
+              likeCount: (article.likeCount || 0) + 1,
+            }
             : article
         )
       );
@@ -327,15 +329,60 @@ const AllQuastion = () => {
     }
   };
 
-  const handleOpen = (item: Question) => {
+
+  // ------------------ View (آیکون چشم + بازدید) ------------------
+
+  const registerView = async (item: Question) => {
+    if (!userId || !cleanToken) return;
+
+    try {
+      const result = await addVisitPageView(item.id, userId, 0, cleanToken);
+
+      if (result.success) {
+        // آپدیت لیست اصلی
+        setArticles((prev) =>
+          prev.map((article) =>
+            article.id === item.id
+              ? {
+                ...article,
+                pageViewCount: (article.pageViewCount ?? 0) + 1,
+              }
+              : article
+          )
+        );
+
+        // اگر همین آیتم در مودال باز است، آن را هم آپدیت کن
+        setSelectedArticle((prev) =>
+          prev && prev.id === item.id
+            ? {
+              ...prev,
+              pageViewCount: (prev.pageViewCount ?? 0) + 1,
+            }
+            : prev
+        );
+      }
+    } catch (error) {
+      console.error("خطا در ثبت بازدید:", error);
+    }
+  };
+
+  const handleOpen = async (item: Question) => {
     setSelectedArticle(item);
     setOpen(true);
+
+    await registerView(item);
   };
+
 
   const handleClose = () => {
     setOpen(false);
     setSelectedArticle(null);
   };
+
+  const handleViewClick = async (item: Question) => {
+    await registerView(item);
+  };
+
 
   const handlePageChange = (page: number, newPageSize?: number) => {
     if (newPageSize && newPageSize !== pageSize) {
@@ -446,34 +493,34 @@ const AllQuastion = () => {
       }}
     >
       {/* لیست مقالات */}
-      <Space
-        direction="vertical"
-        size={15}
-        style={{ width: "100%", borderRadius: 8 }}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(3, 1fr)",
+          gap: "20px",
+          width: "100%",
+        }}
       >
         {currentData.map((item) => (
-          <Card
-            className="border-[1px] hover:border-green-600 w-full md:max-w-none max-w-[95%]"
-            key={item.id}
-            hoverable
-            onClick={() => handleOpen(item)}
-            style={{
-              width: "100%",
-              borderRadius: 8,
-              boxShadow: "0 1px 3px rgba(0,0,0,0.1)",
-              fontFamily: "BYekan",
-            }}
-            bodyStyle={{
-              padding: 6,
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "space-between",
-              fontFamily: "BYekan",
-            }}
-          >
+           <Card
+                      className="border-[1px] cursor-pointer hover:border-green-600 w-full md:max-w-none max-w-[95%]"
+                      key={item.id}
+                      onClick={() => handleOpen(item)}
+                      style={{
+                        width: "100%",
+                        fontFamily: "BYekan",
+                      }}
+                      bodyStyle={{
+                        padding: 6,
+                        height: "100%",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        fontFamily: "BYekan",
+                      }}
+                    >
             {/* Header */}
-            <div className="flex justify-between items-center w-full">
+            {/* <div className="flex justify-between items-center w-full">
               <div className="flex items-center gap-1 justify-between w-full">
                 <div className="flex items-center gap-1">
                   <UserIcon size={12.24} color="#000000A6" />
@@ -497,30 +544,17 @@ const AllQuastion = () => {
                   {formatDate(item.createdDate)}
                 </p>
               </div>
-            </div>
-            <div style={{ marginTop: 10 }}>
-              <Paragraph
-                className="font-yekan font-semibold"
-                ellipsis={{ rows: 3, expandable: false }}
-                style={{
-                  fontSize: 17.5,
-                  width: "99%",
-                  color: "#007041",
-                  marginBottom: 0,
-                  lineHeight: "1.6em",
-                  maxHeight: "7.8em",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  display: "flex",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                }}
-              >
-                {item.questionTitle}
-              </Paragraph>
-            </div>
+            </div> */}
 
-            <div
+
+              <Title
+              className="font-yekan"
+              level={5}
+              style={{ color: "#007041", height: 67, fontSize: 16.5 }}
+            >
+                {item.questionTitle}
+               </Title>
+            {/* <div
               className="mt-2"
               style={{ display: "flex", justifyContent: "space-between" }}
             >
@@ -538,31 +572,52 @@ const AllQuastion = () => {
                   {item.goalTile}
                 </Text>
               </Space>
-            </div>
+            </div> */}
 
-            <div style={{ marginTop: 10 }}>
-              <Paragraph
-                className="font-yekan font-semibold"
-                ellipsis={{ rows: 3, expandable: false }}
+
+{item.questionText && (
+              <div
+                className="flex flex-col gap-1 mb-2"
                 style={{
-                  fontSize: 14,
-                  width: "784px",
-                  color: "#333333",
-                  marginBottom: 0,
-                  lineHeight: "2.6em",
-                  maxHeight: "7.8em",
+                  background: "#F7F7F8",
+                  borderRadius: 8,
+                  padding: "1rem",
+
+                  // ارتفاع ثابت برای یکسان شدن همه کارت‌ها
+                  height: 160,
                   overflow: "hidden",
-                  textOverflow: "ellipsis",
                   display: "flex",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
+                  flexDirection: "column",
                 }}
               >
-                {item.questionText}
-              </Paragraph>
-            </div>
+         
 
-            {item.mentions && item.mentions.length > 0 && (
+                <Paragraph
+                  className="font-yekan"
+                  style={{
+                    fontSize: 12.25,
+                    color: "#333",
+                    margin: 0,
+                    textAlign: "justify",
+                    direction: "rtl",
+
+                    // محدود به 5 خط + ...
+                    overflow: "hidden",
+                    display: "-webkit-box",
+                    WebkitBoxOrient: "vertical",
+                    WebkitLineClamp: 5,
+
+                    lineHeight: "1.7",
+                  }}
+                >
+                  {item.questionText}
+                </Paragraph>
+              </div>
+            )}
+
+
+
+            {/* {item.mentions && item.mentions.length > 0 && (
               <div className="flex flex-wrap gap-1 mt-4">
                 {item.mentions.map((mentions: Mention) => (
                   <div
@@ -576,9 +631,9 @@ const AllQuastion = () => {
                   </div>
                 ))}
               </div>
-            )}
+            )} */}
 
-            {item.attachments.map((atta) =>
+            {/* {item.attachments.map((atta) =>
               atta?.address ? (
                 <a
                   key={atta.id}
@@ -601,7 +656,7 @@ const AllQuastion = () => {
                   </div>
                 </a>
               ) : null
-            )}
+            )} */}
 
 
             {/* Footer */}
@@ -612,19 +667,28 @@ const AllQuastion = () => {
                 alignItems: "center",
               }}
             >
-              <Text
-                className="font-yekan"
-                style={{ fontSize: 10.5, color: "#333", marginTop: 8 }}
-              >
-                <div className="flex items-center gap-1">
-                  {item.tags.map((items, index) => (
-                    <p key={index} className="flex">
-                      #{items.tagTitle}
-                    </p>
-                  ))}
-                </div>
-              </Text>
+
               <Space>
+
+
+                <Space
+                  className="bg-[#F0F0F0] font-yekan"
+                  style={{
+                    padding: "4px 8px",
+                    borderRadius: 8,
+                    cursor: "pointer",
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation(); // جلوگیری از باز شدن کارت
+                    handleViewClick(item);
+                  }}
+                >
+                  <ViewIcon size={12.24} color="#000000A6" />
+                  <Text className="font-yekan" style={{ fontSize: 13, color: "#000000A6" }}>
+                    {toPersianDigits(item.pageViewCount ?? 0)}
+                  </Text>
+                </Space>
+
                 <Space
                   className="font-yekan"
                   style={{
@@ -643,6 +707,8 @@ const AllQuastion = () => {
                       : toPersianDigits("0")}
                   </Text>
                 </Space>
+
+
                 {item.isLiked ? (
                   <Space
                     onClick={(e) => {
@@ -684,7 +750,8 @@ const AllQuastion = () => {
             </div>
           </Card>
         ))}
-      </Space>
+      </div>
+
       {/* پاگینیشن فارسی‌شده */}
       {pageCount > 1 && (
         <div
